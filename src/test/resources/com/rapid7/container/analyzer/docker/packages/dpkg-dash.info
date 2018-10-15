@@ -1,0 +1,13 @@
+Package: dash
+Essential: yes
+Status: install ok installed
+Priority: required
+Section: shells
+Installed-Size: 204
+Maintainer: Gerrit Pape <pape@smarden.org>
+Architecture: amd64
+Version: 0.5.8-2.4
+Depends: debianutils (>= 2.15), dpkg (>= 1.15.0)
+Pre-Depends: libc6 (>= 2.14)
+Description: POSIX-compliant shell
+Homepage: http://gondor.apana.org.au/~herbert/dash/
