@@ -56,7 +56,6 @@ public class RpmFingerprinter implements LayerFileHandler {
             Process process = new ProcessBuilder("/usr/bin/env", "rpm", "--root=" + directory.getAbsolutePath(),"--dbpath=.", "-qa", "--queryformat=" + RPM_QUERY_FORMAT).start();
             LOGGER.info(format("[Image: {}] Parsing RPM output.", image.getId()).getMessage());
             layer.addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layer.getOperatingSystem() : image.getOperatingSystem()));
-            LOGGER.info(layer.getPackages().toString());
             if (!process.waitFor(5, TimeUnit.SECONDS))
               process.destroyForcibly();
           }

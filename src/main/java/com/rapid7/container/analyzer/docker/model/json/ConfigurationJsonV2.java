@@ -1,7 +1,3 @@
-
-/**
- *
- */
 package com.rapid7.container.analyzer.docker.model.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

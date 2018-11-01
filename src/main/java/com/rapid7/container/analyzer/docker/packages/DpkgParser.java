@@ -8,7 +8,7 @@ public class DpkgParser extends PackageParser {
   private static final Pattern DPKG_PATTERN = Pattern.compile("(?<name>.*): (?<value>.*)");
 
   public DpkgParser() {
-    super(DPKG_PATTERN, PackageType.DPGK, new PackageKeys() {
+    super(DPKG_PATTERN, PackageType.DPKG, new PackageKeys() {
 
       @Override
       public String getPackageKey() {

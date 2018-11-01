@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 public class DpkgParserTest {
 
   private static final OperatingSystem OS = new OperatingSystem("Debian", "Linux", "Linux", "x86_64", "9", "Debian Linux 9");
-  private static final Package PACKAGE = new Package(null, PackageType.DPGK, OS, "dash", "0.5.8-2.4", "POSIX-compliant shell", 204000L, "Gerrit Pape <pape@smarden.org>", "http://gondor.apana.org.au/~herbert/dash/", null);
+  private static final Package PACKAGE = new Package(null, PackageType.DPKG, OS, "dash", "0.5.8-2.4", "POSIX-compliant shell", 204000L, "Gerrit Pape <pape@smarden.org>", "http://gondor.apana.org.au/~herbert/dash/", null);
 
   @Test
   public void singleParse() throws FileNotFoundException, IOException {

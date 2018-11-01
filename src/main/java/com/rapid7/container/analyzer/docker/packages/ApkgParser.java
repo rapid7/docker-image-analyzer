@@ -8,7 +8,7 @@ public class ApkgParser extends PackageParser {
   private static final Pattern APKG_PATTERN = Pattern.compile("(?<name>.*):(?<value>.*)");
 
   public ApkgParser() {
-    super(APKG_PATTERN, PackageType.APGK, new PackageKeys() {
+    super(APKG_PATTERN, PackageType.APKG, new PackageKeys() {
 
       @Override
       public String getPackageKey() {

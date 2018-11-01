@@ -32,7 +32,6 @@ import com.rapid7.container.analyzer.docker.packages.ApkgParser;
 import com.rapid7.container.analyzer.docker.packages.DpkgParser;
 import com.rapid7.container.analyzer.docker.packages.PacmanPackageParser;
 import com.rapid7.container.analyzer.docker.packages.RpmPackageParser;
-import com.rapid7.container.analyzer.docker.recog.RecogClient;
 import com.rapid7.container.analyzer.docker.util.InstantParser;
 import com.rapid7.container.analyzer.docker.util.InstantParserModule;
 import java.io.BufferedInputStream;
@@ -70,14 +69,14 @@ public class DockerImageAnalyzerService {
   private List<LayerFileHandler> layerHandlers;
   private List<ImageHandler> imageHandlers;
 
-  public DockerImageAnalyzerService(String rpmDockerImage, File recogMatchersDirectory) {
+  public DockerImageAnalyzerService(String rpmDockerImage) {
     objectMapper = new ObjectMapper();
     objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     objectMapper.registerModule(new InstantParserModule());
     imageHandlers = new ArrayList<>(1);
     imageHandlers.add(new WhiteoutImageHandler());
     layerHandlers = new ArrayList<>(6);
-    layerHandlers.add(new OsReleaseFingerprinter(new Fingerprinter(new RecogClient(recogMatchersDirectory))));
+    layerHandlers.add(new OsReleaseFingerprinter(new Fingerprinter()));
     layerHandlers.add(new RpmFingerprinter(new RpmPackageParser(), rpmDockerImage));
     layerHandlers.add(new DpkgFingerprinter(new DpkgParser()));
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
@@ -88,7 +87,7 @@ public class DockerImageAnalyzerService {
   }
 
   private void initialize() {
-    layerHandlers.forEach(handler -> LOGGER.info("Handler " + handler.getClass().getSimpleName()));
+    layerHandlers.forEach(handler -> LOGGER.debug("Handler " + handler.getClass().getSimpleName()));
   }
 
   public ImageId getId(File imageTar) throws IOException {

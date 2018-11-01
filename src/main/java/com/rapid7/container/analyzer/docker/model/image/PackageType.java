@@ -6,8 +6,8 @@ package com.rapid7.container.analyzer.docker.model.image;
 
 public enum PackageType {
 
-  APGK,
-  DPGK,
+  APKG,
+  DPKG,
   PACMAN,
   RPM,
   UNKNOWN;

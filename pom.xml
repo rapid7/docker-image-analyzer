@@ -44,20 +44,12 @@
   </distributionManagement>
 
   <properties>
-    <r7.recog.java.version>0.7.0</r7.recog.java.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
-    <!-- Rapid7 dependencies -->
-    <dependency>
-      <groupId>com.rapid7.recog</groupId>
-      <artifactId>recog-java</artifactId>
-      <version>${r7.recog.java.version}</version>
-    </dependency>
-
     <!-- 3rd party dependencies -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

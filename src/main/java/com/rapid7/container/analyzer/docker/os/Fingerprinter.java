@@ -1,28 +1,17 @@
-
-/**
- *
- */
 package com.rapid7.container.analyzer.docker.os;
 
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
-import com.rapid7.recog.Recog;
-import com.rapid7.recog.RecogMatchResult;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
 /**
@@ -46,10 +35,8 @@ public class Fingerprinter {
       {"ubuntu", "Ubuntu"},
   }).collect(toMap(kv -> kv[0], kv -> kv[1]));
 
-  private Recog recog;
+  public Fingerprinter() {
 
-  public Fingerprinter(Recog recogClient) {
-    recog = requireNonNull(recogClient, "recog client");
   }
 
   /**
@@ -192,20 +179,6 @@ public class Fingerprinter {
     OperatingSystem operatingSystem = null;
     if (productDescription == null || productDescription.isEmpty())
       return null;
-
-    List<RecogMatchResult> matchResults = recog.fingerprint(productDescription);
-    if (!matchResults.isEmpty()) {
-      RecogMatchResult matchResult = matchResults.get(0);
-      Map<String, String> matches = matchResult.getMatches();
-      String vendor = (matches.get("os.vendor") == null ? "" : matches.get("os.vendor"));
-      if (productVendor != null && !productVendor.isEmpty() && !vendor.toLowerCase().contains(productVendor.toLowerCase()))
-        return operatingSystem; // probably a bad match from recog
-
-      String description = Stream.of(matches.get("os.vendor"), matches.get("os.product"), matches.get("os.version") != null ? matches.get("os.version") : productVersion).filter(Objects::nonNull).collect(joining(" "));
-      String architecture = matches.get("os.arch") == null ? productArchitecture : matches.get("os.arch");
-      if (matches.get("os.product") != null)
-        operatingSystem = new OperatingSystem(matches.get("os.vendor"), matches.get("os.family"), matches.get("os.product"), architecture, matches.get("os.version") != null ? matches.get("os.version") : productVersion, description);
-    }
 
     return operatingSystem;
   }
