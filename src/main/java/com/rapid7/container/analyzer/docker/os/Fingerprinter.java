@@ -56,6 +56,7 @@ public class Fingerprinter {
    * Parses the contents of an os-release file to ascertain the fingerprint of an operating system.
    *
    * @param input The os-release file to parse. Must not be {@code null}.
+   * @param fileName The name of the os-release file to parse. Must not be {@code null}.
    * @return The fingerprint of the operating system, or {@code null} if one could not be detected.
    */
   public OperatingSystem parse(InputStream input, String fileName, String architecture) throws IOException {

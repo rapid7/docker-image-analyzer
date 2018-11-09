@@ -4,10 +4,10 @@ package com.rapid7.container.analyzer.docker.model.image;
  * Base abstraction for a type-safe identifier. Type-safe identifiers can be used to ensure that primitive identifiers
  * for an object are type-safe and do not accidently get misused with other objects. Type-safe identifiers are immutable
  * and cannot be changed once constructed.
- * <p/>
+ *
  * In order to create a type-safe identifier, this class must be extended and that type used in place of the traditional
  * identifier.
- * <p/>
+ *
  *
  * @param <T> The type of the identifier.
  */
