@@ -77,6 +77,8 @@ atlassian-ide-plugin.xml
 # Maven
 /.repostory/
 
+# Visual Studio Code
+/.vscode/
 
 # PD Build Tools #
 ##################

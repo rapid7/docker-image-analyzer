@@ -1,5 +1,8 @@
 ## Docker Image Analyzer
 
+
+[![Travis (.org)](https://img.shields.io/travis/rapid7/docker-image-analyzer.svg)](https://travis-ci.org/rapid7/docker-image-analyzer) [![Maven Central](https://img.shields.io/maven-central/v/com.rapid7.docker/docker-image-analyzer.svg)](https://search.maven.org/artifact/com.rapid7.docker/docker-image-analyzer)
+
 Extracts, parses, and analyzes [Docker](https://www.docker.com) images into Java objects with JSON mappings.
 
 ## Getting Started
