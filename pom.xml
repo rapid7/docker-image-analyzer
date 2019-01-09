@@ -6,6 +6,7 @@
   <artifactId>docker-image-analyzer</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
+  <name>docker-image-analyzer</name>
   <url>https://www.rapid7.com</url>
   <description>Extracts, parses, and analyzes Docker images into Java objects with JSON mappings.</description>
 
