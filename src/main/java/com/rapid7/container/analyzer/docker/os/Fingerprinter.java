@@ -44,7 +44,9 @@ public class Fingerprinter {
    *
    * @param input The os-release file to parse. Must not be {@code null}.
    * @param fileName The name of the os-release file to parse. Must not be {@code null}.
+   * @param architecture The architecture of the operating system
    * @return The fingerprint of the operating system, or {@code null} if one could not be detected.
+   * @throws IOException if there is a problem reading file data
    */
   public OperatingSystem parse(InputStream input, String fileName, String architecture) throws IOException {
     if (fileName.endsWith("/os-release") || fileName.endsWith("/lsb-release"))
