@@ -20,14 +20,11 @@ public class ImageAnalyzerTester {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ImageAnalyzerTester.class);
   private DockerImageAnalyzerService analyzer;
-  private static File recogContentDirectory;
   private static final long MAX_SIZE = 2147483648L;
 
   /**
-   * Test image extraction and fingerprinting. Provide the full path to a local checkout of
-   * github.com/rapid7/recog and the full path to either a docker image tar file (from docker save)
-   * or a directory containing manifest, config, and layer files (from image puller lambda - S3
-   * bucket).
+   * Test image extraction and fingerprinting. Provide the full path to either a docker image
+   * tar file (from docker save) or a directory containing manifest, config, and layer files.
    *
    * @param args Path to Recog, Path to Image file(s)
    */
@@ -35,13 +32,8 @@ public class ImageAnalyzerTester {
     if (args.length < 2)
       throw new IllegalArgumentException("Required arguments: recog path, image file path");
 
-    recogContentDirectory = new File(args[0]);
     ImageAnalyzerTester tester = new ImageAnalyzerTester();
     tester.analyzeImage(new File(args[1]));
-  }
-
-  public File recogContent() {
-    return recogContentDirectory;
   }
 
   public void analyzeImage(File imagePath) throws IOException {

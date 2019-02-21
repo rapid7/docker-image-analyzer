@@ -56,7 +56,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import static java.util.stream.Collectors.summingLong;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.slf4j.helpers.MessageFormatter.arrayFormat;
 import static org.slf4j.helpers.MessageFormatter.format;
@@ -87,7 +86,7 @@ public class DockerImageAnalyzerService {
   }
 
   private void initialize() {
-    layerHandlers.forEach(handler -> LOGGER.debug("Handler " + handler.getClass().getSimpleName()));
+    layerHandlers.forEach(handler -> LOGGER.debug("Handler {}", handler.getClass().getSimpleName()));
   }
 
   public ImageId getId(File imageTar) throws IOException {
@@ -162,9 +161,9 @@ public class DockerImageAnalyzerService {
         Instant start = Instant.now();
         boolean empty = layerHistory.isEmpty();
         LayerId layerId = null;
-        if (!empty) {
+        if (!empty)
           layerId = layers.get(layerIndex);
-        } else
+        else
           layerId = new LayerId(id.getString() + "_empty_" + emptyLayerIdSuffix++);
 
         MDC.put("layer_id", layerId.getString());
@@ -174,8 +173,15 @@ public class DockerImageAnalyzerService {
           layer.setCommand(layerHistory.getCommand());
           layer.setComment(layerHistory.getComment());
           layer.setAuthor(layerHistory.getAuthor());
-          layer.setCreated(InstantParser.parse(layerHistory.getCreated()));
           layer.setEmpty(empty);
+
+          // Images built with a tool called buildkit can have history entries with empty created date, so fall back to previous layer or epoch
+          if (layer.getCreated() != null)
+            layer.setCreated(InstantParser.parse(layerHistory.getCreated()));
+          else if (previousLayer != null && previousLayer.getCreated() != null)
+            layer.setCreated(previousLayer.getCreated());
+          else
+            layer.setCreated(Instant.EPOCH);
 
           // if the layer is non-empty, process it
           if (!empty) {
@@ -241,7 +247,7 @@ public class DockerImageAnalyzerService {
 
       // if the size on the image isn't known (e.g. from a manifest that does not support it), sum up layers as a last resort
       if (image.getSize() == null || image.getSize() <= 0L)
-        image.setSize(image.getLayers().stream().collect(summingLong(Layer::getSize)));
+        image.setSize(image.getLayers().stream().mapToLong(Layer::getSize).sum());
 
       // if the created date on an image isn't known, use the last created date from the last layer
       if (image.getCreated() == null && !image.getLayers().isEmpty())
