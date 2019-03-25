@@ -5,9 +5,8 @@ jdk:
   - openjdk-ea
 matrix:
   allow_failures:
-    - jdk:
-        - openjdk11
-        - openjdk-ea
+    - jdk: openjdk11
+    - jdk: openjdk-ea
   fast_finish: true
 install: true
 before_install:
@@ -20,7 +19,7 @@ jobs:
     - stage: deploy
       if: branch =~ /^(?:master|\d+\.\d+(\.\d+)?(-\S*)?)$/ AND type != pull_request AND fork = false
       script: skip
-      jdk: oraclejdk8
+      jdk: openjdk8
       deploy:
         -
           provider: script
