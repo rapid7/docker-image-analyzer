@@ -13,7 +13,7 @@ Add the dependency to your pom file:
 <dependency>
   <groupId>com.rapid7.docker</groupId>
   <artifactId>docker-image-analyzer</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.3</version>
 </dependency>
 ```
 
