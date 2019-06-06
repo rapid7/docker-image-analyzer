@@ -12,10 +12,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 public class OsReleaseFingerprinter implements LayerFileHandler {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(OsReleaseFingerprinter.class);
   private static final Pattern FILENAME_PATTERN = Pattern.compile("(?i:^((?:\\.)?(?:/)?etc/.*-release|(?:\\.)?(?:/)?usr/lib/os-release)$)");
   private Fingerprinter osReleaseParser;
@@ -30,16 +28,11 @@ public class OsReleaseFingerprinter implements LayerFileHandler {
       if (layer.getOperatingSystem() == null || name.endsWith("/os-release")) {
         OperatingSystem os = osReleaseParser.parse(contents, name, convert(configuration.getArchitecture()));
         if (os != null) {
-          MDC.put("operating_system", os.toString());
-          try {
-            LOGGER.info("Operating system detected on layer.");
-            layer.setOperatingSystem(os);
+          LOGGER.debug("Operating system detected on layer.");
+          layer.setOperatingSystem(os);
 
-            // given all packages detected on the layer this OS reference
-            layer.getPackages().forEach(pkg -> pkg.setOperatingSystem(os));
-          } finally {
-            MDC.remove("operating_system");
-          }
+          // given all packages detected on the layer this OS reference
+          layer.getPackages().forEach(pkg -> pkg.setOperatingSystem(os));
         }
       }
   }

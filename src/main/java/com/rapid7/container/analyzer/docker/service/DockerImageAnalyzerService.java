@@ -35,6 +35,8 @@ import com.rapid7.container.analyzer.docker.packages.RpmPackageParser;
 import com.rapid7.container.analyzer.docker.util.InstantParser;
 import com.rapid7.container.analyzer.docker.util.InstantParserModule;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -45,23 +47,23 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipException;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.slf4j.helpers.MessageFormatter.arrayFormat;
 import static org.slf4j.helpers.MessageFormatter.format;
 
 public class DockerImageAnalyzerService {
-
   private static final Logger LOGGER = LoggerFactory.getLogger(DockerImageAnalyzerService.class);
   private static final String WHITEOUT_AUFS_PREFIX = ".wh.";
   private ObjectMapper objectMapper;
@@ -81,12 +83,10 @@ public class DockerImageAnalyzerService {
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
     layerHandlers.add(new PacmanFingerprinter(new PacmanPackageParser()));
     layerHandlers.add(new FileFingerprinter());
-
-    initialize();
   }
 
-  private void initialize() {
-    layerHandlers.forEach(handler -> LOGGER.debug("Handler {}", handler.getClass().getSimpleName()));
+  public void addFileHandler(LayerFileHandler handler) {
+    layerHandlers.add(Objects.requireNonNull(handler));
   }
 
   public ImageId getId(File imageTar) throws IOException {
@@ -157,7 +157,6 @@ public class DockerImageAnalyzerService {
       int emptyLayerIdSuffix = 0;
       Layer previousLayer = null;
       for (HistoryJson layerHistory : layerHistories) {
-
         Instant start = Instant.now();
         boolean empty = layerHistory.isEmpty();
         LayerId layerId = null;
@@ -166,79 +165,55 @@ public class DockerImageAnalyzerService {
         else
           layerId = new LayerId(id.getString() + "_empty_" + emptyLayerIdSuffix++);
 
-        MDC.put("layer_id", layerId.getString());
-        LOGGER.info("Processing layer.");
-        try {
-          Layer layer = new Layer(layerId);
-          layer.setCommand(layerHistory.getCommand());
-          layer.setComment(layerHistory.getComment());
-          layer.setAuthor(layerHistory.getAuthor());
-          layer.setEmpty(empty);
+        LOGGER.debug("Processing layer {}.", layerId);
 
-          // Images built with a tool called buildkit can have history entries with empty created date, so fall back to previous layer or epoch
-          if (layer.getCreated() != null)
-            layer.setCreated(InstantParser.parse(layerHistory.getCreated()));
-          else if (previousLayer != null && previousLayer.getCreated() != null)
-            layer.setCreated(previousLayer.getCreated());
-          else
-            layer.setCreated(Instant.EPOCH);
+        Layer layer = new Layer(layerId);
+        layer.setCommand(layerHistory.getCommand());
+        layer.setComment(layerHistory.getComment());
+        layer.setAuthor(layerHistory.getAuthor());
+        layer.setEmpty(empty);
 
-          // if the layer is non-empty, process it
-          if (!empty) {
+        // Images built with a tool called buildkit can have history entries with empty created date, so fall back to previous layer or epoch
+        if (layer.getCreated() != null)
+          layer.setCreated(InstantParser.parse(layerHistory.getCreated()));
+        else if (previousLayer != null && previousLayer.getCreated() != null)
+          layer.setCreated(previousLayer.getCreated());
+        else
+          layer.setCreated(Instant.EPOCH);
 
-            // locate the layer to process
-            LayerId layerRetrievalId = layerBlobIds.get(layerIndex);
-            File layerTar = layerSupplier.getLayer(layerRetrievalId);
-            layer.setSize(layerTar.length());
+        // if the layer is non-empty, process it
+        if (!empty) {
 
-            MDC.put("layer_blob_id", layerRetrievalId.getString());
+          // locate the layer to process
+          LayerId layerRetrievalId = layerBlobIds.get(layerIndex);
+          File layerTar = layerSupplier.getLayer(layerRetrievalId);
+          layer.setSize(layerTar.length());
+          LOGGER.debug("Processing layer tar.");
+
+          // extract layer
+          processLayer(image, configuration, layer, layerTar);
+
+          // attach additional layer information
+          File layerInfoFile = new File(layerTar.getParentFile(), "json");
+          if (layerInfoFile.exists()) {
             try {
-              LOGGER.info("Processing layer tar.");
-
-              // extract layer
-              processLayer(image, configuration, layer, layerTar);
-
-              // attach additional layer information
-              File layerInfoFile = new File(layerTar.getParentFile(), "json");
-              if (layerInfoFile.exists()) {
-                try {
-                  LayerJson layerInfo = parseLayerConfiguration(layerInfoFile);
-                  layer.setCreated(layerInfo.getCreated());
-                  layer.setParentId(layerInfo.getParentId());
-                } catch (Exception exception) {
-                  LOGGER.warn("Failed to parse layer configuration json. Skipping setting of created data and parent identifier.", exception);
-                }
-              } else if (previousLayer != null) {
-                layer.setParentId(previousLayer.getId());
-              }
-            } finally {
-              MDC.remove("layer_blob_id");
+              LayerJson layerInfo = parseLayerConfiguration(layerInfoFile);
+              layer.setCreated(layerInfo.getCreated());
+              layer.setParentId(layerInfo.getParentId());
+            } catch (Exception exception) {
+              LOGGER.warn("Failed to parse layer configuration json. Skipping setting of created data and parent identifier.", exception);
             }
-
-            layerIndex++;
-            previousLayer = layer;
           } else if (previousLayer != null) {
             layer.setParentId(previousLayer.getId());
           }
 
-          image.addLayer(layer);
-
-          if (layer.getOperatingSystem() != null)
-            MDC.put("operating_system", layer.getOperatingSystem().toString());
-          
-          MDC.put("packages", Integer.toString(layer.getPackages().size()));
-          try {
-            Duration duration = Duration.between(start, Instant.now());
-            MDC.put("payload_process_time_ms", String.valueOf(duration.toMillis()));
-            LOGGER.info("Layer processed.");
-          } finally {
-            MDC.remove("operating_system");
-            MDC.remove("packages");
-            MDC.remove("payload_process_time_ms");
-          }
-        } finally {
-          MDC.remove("layer_id");
+          layerIndex++;
+          previousLayer = layer;
+        } else if (previousLayer != null) {
+          layer.setParentId(previousLayer.getId());
         }
+
+        image.addLayer(layer);
       }
 
       // post-process image handlers
@@ -322,17 +297,46 @@ public class DockerImageAnalyzerService {
 
   private void processLayer(Image image, Configuration configuration, Layer layer, File tar) throws FileNotFoundException, IOException {
 
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar)))) {
-      TarArchiveEntry entry = null;
-      while ((entry = tarIn.getNextTarEntry()) != null) {
-        String name = entry.getName();
+    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(tar), 65536))) {
+      processLayerTar(image, configuration, layer, tar, tarIn);
+    } catch (ZipException ze) {
+      try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
+        processLayerTar(image, configuration, layer, tar, tarIn);
+      }
+    }
+  }
 
+  private void processLayerTar(Image image, Configuration configuration, Layer layer, File tar, TarArchiveInputStream tarIn) throws IOException {
+    TarArchiveEntry entry = null;
+    while ((entry = tarIn.getNextTarEntry()) != null) {
+      String name = entry.getName();
+      if (LOGGER.isTraceEnabled())
         LOGGER.trace(arrayFormat("[Image: {}] Processing {} {}.", new Object[]{tar.getName(), entry.isDirectory() ? "directory" : "file", name}).getMessage());
 
+      int size;
+      if (entry.getSize() > 1_048_576)
+        size = 1_048_576;
+      else
+        size = (int) entry.getSize();
+
+      try (ConvertibleOutputStream out = new ConvertibleOutputStream(size)) {
+        IOUtils.copy(tarIn, out);
+        InputStream contents = out.toInputStream();
         for (LayerFileHandler handler : layerHandlers) {
-          handler.handle(name, entry, new NonClosingInputStream(tarIn), image, configuration, layer);
+          handler.handle(name, entry, contents, image, configuration, layer);
+          contents.reset();
         }
       }
+    }
+  }
+
+  private static class ConvertibleOutputStream extends ByteArrayOutputStream {
+    public ConvertibleOutputStream(int size) {
+      super(size);
+    }
+    // Creates InputStream without actually copying the buffer and using up memory for that.
+    public InputStream toInputStream() {
+      return new ByteArrayInputStream(buf, 0, count);
     }
   }
 
