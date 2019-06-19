@@ -1,8 +1,6 @@
 package com.rapid7.container.analyzer.docker.os;
 
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
-import com.rapid7.container.analyzer.docker.model.image.Package;
-import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +18,9 @@ import static java.util.stream.Collectors.toMap;
 public class Fingerprinter {
 
   private static final Pattern PATTERN = Pattern.compile("(?<name>.*)=(?<value>.*)");
+  private static final Pattern PHOTON_RELEASE = Pattern.compile("^(?i:VMWare Photon(?:\\s?OS)?(?:/)?(?:\\s?Linux)?\\s?(?:v)?(\\d+?(?:\\.\\d+?)*?)?)$");
+  private static final Pattern RHEL_RELEASE = Pattern.compile("^(?i:(?:Red Hat|RedHat|Red-Hat|RHEL)(?: Enterprise)?(?: Linux)?(?: Server)?(?: release)?(?: [a-z]+)?\\s?(\\d+?(?:\\.\\d+?)*?)?)(?:\\s?\\(.*\\))?$");
+  private static final String OS_FAMILY = "Linux";
   private static final Map<String, String> OS_ID_TO_VENDOR = Arrays.stream(new String[][]{
       {"alpine", "Alpine"},
       {"amzn", "Amazon"},
@@ -34,10 +35,6 @@ public class Fingerprinter {
       {"rhel", "Red Hat"},
       {"ubuntu", "Ubuntu"},
   }).collect(toMap(kv -> kv[0], kv -> kv[1]));
-
-  public Fingerprinter() {
-
-  }
 
   /**
    * Parses the contents of an os-release file to ascertain the fingerprint of an operating system.
@@ -97,37 +94,25 @@ public class Fingerprinter {
       }
 
       String vendor = OS_ID_TO_VENDOR.get(id);
-      OperatingSystem operatingSystem = null;
+      if (!vendor.equals("VMWare"))
+        product = OS_FAMILY;
 
-      // attempt to run recog against the name and version, which should be accurate already
-      if (product != null && !product.isEmpty() && version != null && !version.isEmpty())
-        operatingSystem = fingerprintOperatingSystem(product + " " + version, version, vendor, architecture);
-
-      // try with description if first try didn't match
-      if (operatingSystem == null && description != null)
-        operatingSystem = fingerprintOperatingSystem(description, version, vendor, architecture);
-
-      // try with product name if the description was null or didn't match
-      if (operatingSystem == null && product != null)
-        operatingSystem = fingerprintOperatingSystem(product, version, vendor, architecture);
-
-      // default to building a fingerprint with the distribution ID and release version
-      if (operatingSystem == null && product != null && version != null)
-        operatingSystem = new OperatingSystem(vendor == null ? trimProductName(product) : vendor, "Linux", "Linux", architecture, version, description);
-
-      return operatingSystem;
+      return fingerprintOperatingSystem(vendor, product, version, architecture);
     }
   }
 
   private OperatingSystem parseRhelFamilyRelease(InputStream input, String architecture) throws IOException {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+      Matcher matcher = RHEL_RELEASE.matcher("");
+      String version = "";
       String line = null;
-      String description = "";
       while ((line = reader.readLine()) != null) {
-        description += line;
+        matcher.reset(line);
+        if (matcher.matches())
+          version = matcher.group(1);
       }
 
-      return fingerprintOperatingSystem(description, null, null, architecture);
+      return fingerprintOperatingSystem("Red Hat", OS_FAMILY, version, architecture);
     }
   }
 
@@ -140,48 +125,31 @@ public class Fingerprinter {
           version = line;
       }
 
-      return fingerprintOperatingSystem("Alpine Linux", version, "Alpine", architecture);
+      return fingerprintOperatingSystem("Alpine", OS_FAMILY, version, architecture);
     }
   }
 
   private OperatingSystem parsePhotonRelease(InputStream input, String architecture) throws IOException {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+      Matcher matcher = PHOTON_RELEASE.matcher("");
+      String product = "Photon Linux";
+      String version = "";
       String line = null;
-      String description = null;
       while ((line = reader.readLine()) != null) {
-        if (line.startsWith("VMWare"))
-          description = line;
+        matcher.reset(line);
+        if (matcher.matches())
+          version = matcher.group(1);
       }
 
-      return fingerprintOperatingSystem(description, null, "VMWare", architecture);
+      return fingerprintOperatingSystem("VMWare", product, version, architecture);
     }
   }
 
-  private String trimProductName(String productName) {
-    return productName.replaceAll("(?i:\\s+(?:Enterprise|(?:GNU/)?Linux).*)", "");
+  private OperatingSystem fingerprintOperatingSystem(String vendor, String product, String version, String architecture) {
+    if (vendor.equals("VMWare"))
+      product = "Photon Linux";
+
+    return new OperatingSystem(vendor, OS_FAMILY, product, architecture, version, vendor + " " + product + " " + version);
   }
 
-  public Package fingerprintPackage(OperatingSystem operatingSystem, String pkg) {
-
-    Pattern pattern = Pattern.compile("(?<name>.*) (?<version>.*).*");
-    Matcher matcher = pattern.matcher(pkg);
-    if (matcher.matches()) {
-      String name = matcher.group("name");
-      String version = matcher.group("version");
-      return new Package("linux", PackageType.UNKNOWN, operatingSystem, name, version, pkg, 0L, null, null, null);
-    } else
-      return null;
-  }
-
-  public OperatingSystem fingerprintOperatingSystem(String productDescription, String productArchitecture) {
-    return fingerprintOperatingSystem(productDescription, null, null, productArchitecture);
-  }
-
-  public OperatingSystem fingerprintOperatingSystem(String productDescription, String productVersion, String productVendor, String productArchitecture) {
-    OperatingSystem operatingSystem = null;
-    if (productDescription == null || productDescription.isEmpty())
-      return null;
-
-    return operatingSystem;
-  }
 }
