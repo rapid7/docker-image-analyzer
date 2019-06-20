@@ -63,9 +63,9 @@ public class Fingerprinter {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
       String line = null;
       String id = null;
-      String product = null;
+      String product = OS_FAMILY;
       String description = null;
-      String version = null;
+      String version = "";
       while ((line = reader.readLine()) != null) {
         Matcher matcher = PATTERN.matcher(line);
         if (matcher.matches()) {
@@ -73,7 +73,7 @@ public class Fingerprinter {
           String value = matcher.group("value");
           switch (name) {
             case "ID":
-              id = value.replaceAll("\"", "");
+              id = value.replaceAll("\"", "").toLowerCase();
               break;
             case "NAME":
             case "DISTRIB_ID":
@@ -94,10 +94,10 @@ public class Fingerprinter {
       }
 
       String vendor = OS_ID_TO_VENDOR.get(id);
-      if (!vendor.equals("VMWare"))
+      if (!"VMWare".equals(vendor))
         product = OS_FAMILY;
 
-      return fingerprintOperatingSystem(vendor, product, version, architecture);
+      return fingerprintOperatingSystem(vendor != null ? vendor : OS_FAMILY, product, version, architecture);
     }
   }
 
@@ -119,9 +119,9 @@ public class Fingerprinter {
   private OperatingSystem parseAlpineRelease(InputStream input, String architecture) throws IOException {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
       String line = null;
-      String version = null;
+      String version = "";
       while ((line = reader.readLine()) != null) {
-        if (version == null && line.matches("(?:\\d+(?:\\.)?)+"))
+        if (version.isEmpty() && line.matches("(?:\\d+(?:\\.)?)+"))
           version = line;
       }
 
@@ -146,7 +146,7 @@ public class Fingerprinter {
   }
 
   private OperatingSystem fingerprintOperatingSystem(String vendor, String product, String version, String architecture) {
-    if (vendor.equals("VMWare"))
+    if ("VMWare".equals(vendor))
       product = "Photon Linux";
 
     return new OperatingSystem(vendor, OS_FAMILY, product, architecture, version, vendor + " " + product + " " + version);
