@@ -73,10 +73,10 @@ public class Fingerprinter {
           String value = matcher.group("value");
           switch (name) {
             case "ID":
+            case "DISTRIB_ID":
               id = value.replaceAll("\"", "").toLowerCase();
               break;
             case "NAME":
-            case "DISTRIB_ID":
               product = value.replaceAll("\"", "");
               break;
             case "VERSION_ID":

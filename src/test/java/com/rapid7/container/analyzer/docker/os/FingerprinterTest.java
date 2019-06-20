@@ -118,4 +118,18 @@ class FingerprinterTest {
     assertEquals("16.04", os.getVersion());
     assertEquals("Ubuntu Linux 16.04", os.getDescription());
   }
+
+  @Test
+  void parseUbuntuLsbRelease() throws IOException {
+    // Given
+    Fingerprinter fp = new Fingerprinter();
+
+    // When
+    OperatingSystem os = fp.parse(FingerprinterTest.class.getResourceAsStream("ubuntu-lsb-release.txt"), "/etc/lsb-release", "x86_64");
+
+    // Then
+    assertEquals("Ubuntu", os.getVendor());
+    assertEquals("16.04", os.getVersion());
+    assertEquals("Ubuntu Linux 16.04", os.getDescription());
+  }
 }
