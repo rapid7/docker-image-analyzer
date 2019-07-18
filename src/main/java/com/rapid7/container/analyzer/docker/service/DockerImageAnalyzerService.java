@@ -82,11 +82,15 @@ public class DockerImageAnalyzerService {
     layerHandlers.add(new DpkgFingerprinter(new DpkgParser()));
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
     layerHandlers.add(new PacmanFingerprinter(new PacmanPackageParser()));
-    layerHandlers.add(new FileFingerprinter());
   }
 
   public void addFileHandler(LayerFileHandler handler) {
     layerHandlers.add(Objects.requireNonNull(handler));
+  }
+
+  public void addFileHashFingeprinter() {
+    if (layerHandlers.stream().noneMatch(h -> h instanceof FileFingerprinter))
+      layerHandlers.add(new FileFingerprinter());
   }
 
   public ImageId getId(File imageTar) throws IOException {
