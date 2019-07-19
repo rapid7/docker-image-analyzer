@@ -66,6 +66,7 @@ import static org.slf4j.helpers.MessageFormatter.format;
 public class DockerImageAnalyzerService {
   private static final Logger LOGGER = LoggerFactory.getLogger(DockerImageAnalyzerService.class);
   private static final String WHITEOUT_AUFS_PREFIX = ".wh.";
+  private static final long MAX_FILE_SIZE = 1_048_576 * 10; // 10 MB
   private ObjectMapper objectMapper;
   private List<LayerFileHandler> layerHandlers;
   private List<ImageHandler> imageHandlers;
@@ -283,6 +284,7 @@ public class DockerImageAnalyzerService {
 
         try {
           if (entry.isDirectory()) {
+            //noinspection ResultOfMethodCallIgnored
             file.mkdirs();
           } else if (!name.contains(WHITEOUT_AUFS_PREFIX)) {
             try (FileOutputStream outputStream = new FileOutputStream(file)) {
@@ -317,13 +319,14 @@ public class DockerImageAnalyzerService {
       if (LOGGER.isTraceEnabled())
         LOGGER.trace(arrayFormat("[Image: {}] Processing {} {}.", new Object[]{tar.getName(), entry.isDirectory() ? "directory" : "file", name}).getMessage());
 
-      int size;
-      if (entry.getSize() > 1_048_576)
-        size = 1_048_576;
-      else
-        size = (int) entry.getSize();
+      // skip 10 MB+ files
+      // TODO: need to be able to partially read large files in the future. maybe copy to a temp file so we can stream it or memory map its contents.
+      if (entry.getSize() > MAX_FILE_SIZE) {
+        LOGGER.debug("Skipping file {} with size {} bytes because exceeds max of {} bytes.", name, entry.getSize(), MAX_FILE_SIZE);
+        continue;
+      }
 
-      try (ConvertibleOutputStream out = new ConvertibleOutputStream(size)) {
+      try (ConvertibleOutputStream out = new ConvertibleOutputStream((int) entry.getSize())) {
         IOUtils.copy(tarIn, out);
         InputStream contents = out.toInputStream();
         for (LayerFileHandler handler : layerHandlers) {
