@@ -66,7 +66,8 @@ import static org.slf4j.helpers.MessageFormatter.format;
 public class DockerImageAnalyzerService {
   private static final Logger LOGGER = LoggerFactory.getLogger(DockerImageAnalyzerService.class);
   private static final String WHITEOUT_AUFS_PREFIX = ".wh.";
-  private static final long MAX_FILE_SIZE = 1_048_576 * 10; // 10 MB
+  private static final long MAX_READ_FILE_SIZE = 1_048_576 * 25; // 25 MB
+  private static final long MAX_EXTRACT_FILE_SIZE = 1_048_576 * 256; // 256 MB
   private ObjectMapper objectMapper;
   private List<LayerFileHandler> layerHandlers;
   private List<ImageHandler> imageHandlers;
@@ -319,19 +320,47 @@ public class DockerImageAnalyzerService {
       if (LOGGER.isTraceEnabled())
         LOGGER.trace(arrayFormat("[Image: {}] Processing {} {}.", new Object[]{tar.getName(), entry.isDirectory() ? "directory" : "file", name}).getMessage());
 
-      // skip 10 MB+ files
-      // TODO: need to be able to partially read large files in the future. maybe copy to a temp file so we can stream it or memory map its contents.
-      if (entry.getSize() > MAX_FILE_SIZE) {
-        LOGGER.debug("Skipping file {} with size {} bytes because exceeds max of {} bytes.", name, entry.getSize(), MAX_FILE_SIZE);
-        continue;
-      }
+      // extract 25 MB+ files instead of reading fully into memory
+      if (entry.getSize() > MAX_READ_FILE_SIZE) {
+        if (entry.getSize() > MAX_EXTRACT_FILE_SIZE) {
+          LOGGER.debug("Skipping file {} with size {} bytes because exceeds max of {} bytes.", name, entry.getSize(), MAX_EXTRACT_FILE_SIZE);
+          continue;
+        }
+        LOGGER.debug(format("Extracting large file {} ({} bytes)", entry.getName(), entry.getSize()).getMessage());
+        try {
+          File bigFile = new File(tar.getParentFile(), entry.getName());
+          if (!bigFile.toPath().toAbsolutePath().normalize().startsWith(bigFile.getParentFile().toPath().toAbsolutePath().normalize())) {
+            LOGGER.debug(format("[Image: {}] Skipping extraction of {} due to directory traversal.", tar.getName(), name).getMessage());
+            continue;
+          }
 
-      try (ConvertibleOutputStream out = new ConvertibleOutputStream((int) entry.getSize())) {
-        IOUtils.copy(tarIn, out);
-        InputStream contents = out.toInputStream();
-        for (LayerFileHandler handler : layerHandlers) {
-          handler.handle(name, entry, contents, image, configuration, layer);
-          contents.reset();
+          bigFile.getParentFile().mkdirs();
+          try (FileOutputStream outputStream = new FileOutputStream(bigFile)) {
+            IOUtils.copy(tarIn, outputStream);
+          }
+
+          try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(bigFile), 65536)) {
+            inputStream.mark((int) (bigFile.getTotalSpace() + 1));
+            for (LayerFileHandler handler : layerHandlers) {
+              handler.handle(name, entry, inputStream, image, configuration, layer);
+              inputStream.reset();
+            }
+          }
+
+          bigFile.delete();
+        } catch (IOException e) {
+          LOGGER.info("Failed to handle file {}", entry.getName());
+        }
+      }
+      else {
+        // read small files in memory
+        try (ConvertibleOutputStream out = new ConvertibleOutputStream((int) entry.getSize())) {
+          IOUtils.copy(tarIn, out);
+          InputStream contents = out.toInputStream();
+          for (LayerFileHandler handler : layerHandlers) {
+            handler.handle(name, entry, contents, image, configuration, layer);
+            contents.reset();
+          }
         }
       }
     }
