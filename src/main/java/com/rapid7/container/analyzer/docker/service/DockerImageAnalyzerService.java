@@ -326,9 +326,10 @@ public class DockerImageAnalyzerService {
           LOGGER.debug("Skipping file {} with size {} bytes because exceeds max of {} bytes.", name, entry.getSize(), MAX_EXTRACT_FILE_SIZE);
           continue;
         }
+
         LOGGER.debug(format("Extracting large file {} ({} bytes)", entry.getName(), entry.getSize()).getMessage());
+        File bigFile = new File(tar.getParentFile(), entry.getName());
         try {
-          File bigFile = new File(tar.getParentFile(), entry.getName());
           if (!bigFile.toPath().toAbsolutePath().normalize().startsWith(bigFile.getParentFile().toPath().toAbsolutePath().normalize())) {
             LOGGER.debug(format("[Image: {}] Skipping extraction of {} due to directory traversal.", tar.getName(), name).getMessage());
             continue;
@@ -346,10 +347,10 @@ public class DockerImageAnalyzerService {
               inputStream.reset();
             }
           }
-
+        } catch (IOException ioe) {
+          LOGGER.info("Failed to handle file {}", entry.getName(), ioe);
+        } finally {
           bigFile.delete();
-        } catch (IOException e) {
-          LOGGER.info("Failed to handle file {}", entry.getName());
         }
       }
       else {
