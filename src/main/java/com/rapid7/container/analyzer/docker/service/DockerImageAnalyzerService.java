@@ -163,7 +163,6 @@ public class DockerImageAnalyzerService {
       int emptyLayerIdSuffix = 0;
       Layer previousLayer = null;
       for (HistoryJson layerHistory : layerHistories) {
-        Instant start = Instant.now();
         boolean empty = layerHistory.isEmpty();
         LayerId layerId = null;
         if (!empty)
@@ -180,7 +179,7 @@ public class DockerImageAnalyzerService {
         layer.setEmpty(empty);
 
         // Images built with a tool called buildkit can have history entries with empty created date, so fall back to previous layer or epoch
-        if (layer.getCreated() != null)
+        if (layerHistory.getCreated() != null)
           layer.setCreated(InstantParser.parse(layerHistory.getCreated()));
         else if (previousLayer != null && previousLayer.getCreated() != null)
           layer.setCreated(previousLayer.getCreated());
