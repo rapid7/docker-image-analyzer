@@ -302,6 +302,9 @@ public class DockerImageAnalyzerService {
   }
 
   private void processLayer(Image image, Configuration configuration, Layer layer, File tar) throws FileNotFoundException, IOException {
+    // skip invalid files (too small to be a tar or gzipped tar, and symlinks are duplicate layers)
+    if (tar.length() < 100)
+      return;
 
     try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(tar), 65536))) {
       processLayerTar(image, configuration, layer, tar, tarIn);
