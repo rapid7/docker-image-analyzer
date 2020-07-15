@@ -1,6 +1,7 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
+import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.image.Layer;
 import com.rapid7.container.analyzer.docker.model.json.Configuration;
@@ -24,8 +25,8 @@ public class RpmFingerprinter implements LayerFileHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(RpmFingerprinter.class);
   private static final String RPM_QUERY_FORMAT = "Package:%{NAME}\nSource:%{SOURCEPACKAGE}\nDescription:%{SUMMARY}\nInstalled-Size:%{SIZE}\nLicense:%{LICENSE}\nHomepage:%{URL}\nMaintainer:%{VENDOR}\nVersion:%{VERSION}\nEpoch:%{EPOCH}\nRelease:%{RELEASE}\n\n";
   private static final String DEFAULT_DOCKER_IMAGE = "centos";
-  private RpmPackageParser rpmPackageParser;
-  private String rpmDockerImage;
+  private final RpmPackageParser rpmPackageParser;
+  private final String rpmDockerImage;
 
   public RpmFingerprinter(RpmPackageParser rpmPackageParser, String rpmDockerImage) {
     this.rpmPackageParser = rpmPackageParser;
@@ -33,8 +34,8 @@ public class RpmFingerprinter implements LayerFileHandler {
   }
 
   @Override
-  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, Layer layer) throws IOException {
-    if (!entry.isSymbolicLink() && name.endsWith("lib/rpm/Packages")) {
+  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPathWrapper layerPathWrapper) throws IOException {
+    if (rpmPackageParser.supports(name, entry)) {
       File directory = Files.createTempDirectory("rpm").toFile();
       try {
         File packages = new File(directory, "Packages");
@@ -55,7 +56,7 @@ public class RpmFingerprinter implements LayerFileHandler {
             // the --dbpath flag uses a path relative to the root path. we use "." (current directory) since the root path is the full rpmdb path.
             Process process = new ProcessBuilder("/usr/bin/env", "rpm", "--root=" + directory.getAbsolutePath(),"--dbpath=.", "-qa", "--queryformat=" + RPM_QUERY_FORMAT).start();
             LOGGER.info(format("[Image: {}] Parsing RPM output.", image.getId()).getMessage());
-            layer.addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layer.getOperatingSystem() : image.getOperatingSystem()));
+            layerPathWrapper.getLayer().addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
             if (!process.waitFor(5, TimeUnit.SECONDS))
               process.destroyForcibly();
           }
@@ -72,10 +73,10 @@ public class RpmFingerprinter implements LayerFileHandler {
             LOGGER.info("stderr: {}", IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8));
           } else {
             LOGGER.info(format("[Image: {}] Parsing RPM output.", image.getId()).getMessage());
-            layer.addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layer.getOperatingSystem() : image.getOperatingSystem()));
+            layerPathWrapper.getLayer().addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
             if (!process.waitFor(300, TimeUnit.SECONDS)) // TODO: user configurable?
               process.destroyForcibly();
-            LOGGER.info("Parsed {} packages from layer.", layer.getPackages().size());
+            LOGGER.info("Parsed {} packages from layer.", layerPathWrapper.getLayer().getPackages().size());
           }
         } else {
           LOGGER.warn("No suitable commands available to fingerprint RPM packages.");

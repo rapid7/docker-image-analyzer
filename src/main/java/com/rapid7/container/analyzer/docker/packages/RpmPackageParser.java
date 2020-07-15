@@ -2,8 +2,9 @@ package com.rapid7.container.analyzer.docker.packages;
 
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import java.util.regex.Pattern;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 
-public class RpmPackageParser extends PackageParser {
+public class RpmPackageParser extends PatternPackageParser {
 
   private static final Pattern RPM_PATTERN = Pattern.compile("(?<name>.*):(?<value>.*)");
 
@@ -60,5 +61,10 @@ public class RpmPackageParser extends PackageParser {
         return "Release";
       }
     });
+  }
+
+  @Override
+  public boolean supports(String name, TarArchiveEntry entry) {
+    return !entry.isSymbolicLink() && name.endsWith("lib/rpm/Packages");
   }
 }

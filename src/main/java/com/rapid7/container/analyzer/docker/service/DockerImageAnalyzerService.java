@@ -11,10 +11,12 @@ import com.rapid7.container.analyzer.docker.fingerprinter.ApkgFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.DpkgFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.FileFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.OsReleaseFingerprinter;
+import com.rapid7.container.analyzer.docker.fingerprinter.OwaspDependencyFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.PacmanFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.RpmFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.WhiteoutImageHandler;
 import com.rapid7.container.analyzer.docker.model.Digest;
+import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.image.ImageId;
 import com.rapid7.container.analyzer.docker.model.image.ImageType;
@@ -30,8 +32,10 @@ import com.rapid7.container.analyzer.docker.model.json.TarManifestJson;
 import com.rapid7.container.analyzer.docker.os.Fingerprinter;
 import com.rapid7.container.analyzer.docker.packages.ApkgParser;
 import com.rapid7.container.analyzer.docker.packages.DpkgParser;
+import com.rapid7.container.analyzer.docker.packages.OwaspDependencyParser;
 import com.rapid7.container.analyzer.docker.packages.PacmanPackageParser;
 import com.rapid7.container.analyzer.docker.packages.RpmPackageParser;
+import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
 import com.rapid7.container.analyzer.docker.util.InstantParser;
 import com.rapid7.container.analyzer.docker.util.InstantParserModule;
 import java.io.BufferedInputStream;
@@ -84,6 +88,7 @@ public class DockerImageAnalyzerService {
     layerHandlers.add(new DpkgFingerprinter(new DpkgParser()));
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
     layerHandlers.add(new PacmanFingerprinter(new PacmanPackageParser()));
+    layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(OwaspDependencyParserSettingsBuilder.EXPERIMENTAL)));
   }
 
   public void addFileHandler(LayerFileHandler handler) {
@@ -345,7 +350,7 @@ public class DockerImageAnalyzerService {
           try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(bigFile), 65536)) {
             inputStream.mark((int) (bigFile.getTotalSpace() + 1));
             for (LayerFileHandler handler : layerHandlers) {
-              handler.handle(name, entry, inputStream, image, configuration, layer);
+              handler.handle(name, entry, inputStream, image, configuration, new LayerPathWrapper(tar.getParent(), layer));
               inputStream.reset();
             }
           }
@@ -361,7 +366,7 @@ public class DockerImageAnalyzerService {
           IOUtils.copy(tarIn, out);
           InputStream contents = out.toInputStream();
           for (LayerFileHandler handler : layerHandlers) {
-            handler.handle(name, entry, contents, image, configuration, layer);
+            handler.handle(name, entry, contents, image, configuration, new LayerPathWrapper(tar.getParent(), layer));
             contents.reset();
           }
         }

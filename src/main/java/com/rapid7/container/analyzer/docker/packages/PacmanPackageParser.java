@@ -11,8 +11,17 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 
-public class PacmanPackageParser {
+public class PacmanPackageParser implements PackageParser<InputStream>{
+
+  private static final Pattern PACMAN_DESC_PATTERN = Pattern.compile(".*/lib/pacman/local/(?<name>.*)/desc");
+
+  @Override
+  public boolean supports(String name, TarArchiveEntry entry) {
+    return !entry.isSymbolicLink() && PACMAN_DESC_PATTERN.matcher(name).matches();
+  }
 
   public Set<Package> parse(InputStream input, OperatingSystem operatingSystem) throws FileNotFoundException, IOException {
     Set<Package> packages = new HashSet<>();

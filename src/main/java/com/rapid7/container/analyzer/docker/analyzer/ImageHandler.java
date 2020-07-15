@@ -5,5 +5,5 @@ import java.io.IOException;
 
 public interface ImageHandler {
 
-  public void handle(Image image) throws IOException;
+  void handle(Image image) throws IOException;
 }

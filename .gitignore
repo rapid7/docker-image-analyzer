@@ -19,7 +19,6 @@ archaius-core/MySiteConfiguration/
 *.iso
 *.jar
 *.rar
-*.tar
 *.zip
 
 # Logs and databases #

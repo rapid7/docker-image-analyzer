@@ -5,5 +5,6 @@ import java.io.File;
 import java.io.IOException;
 
 public interface LayerExtractor {
-  public File getLayer(LayerId layerId) throws IOException;
+
+  File getLayer(LayerId layerId) throws IOException;
 }

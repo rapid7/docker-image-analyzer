@@ -1,6 +1,7 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
+import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.image.Layer;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
@@ -16,23 +17,23 @@ import org.slf4j.LoggerFactory;
 public class OsReleaseFingerprinter implements LayerFileHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(OsReleaseFingerprinter.class);
   private static final Pattern FILENAME_PATTERN = Pattern.compile("(?i:^((?:\\.)?(?:/)?etc/.*-release|(?:\\.)?(?:/)?usr/lib/os-release)$)");
-  private Fingerprinter osReleaseParser;
+  private final Fingerprinter osReleaseParser;
 
   public OsReleaseFingerprinter(Fingerprinter osReleaseParser) {
     this.osReleaseParser = osReleaseParser;
   }
 
   @Override
-  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, Layer layer) throws IOException {
+  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPathWrapper layerPathWrapper) throws IOException {
     if (!entry.isSymbolicLink() && FILENAME_PATTERN.matcher(name).matches())
-      if (layer.getOperatingSystem() == null || name.endsWith("/os-release")) {
+      if (layerPathWrapper.getLayer().getOperatingSystem() == null || name.endsWith("/os-release")) {
         OperatingSystem os = osReleaseParser.parse(contents, name, convert(configuration.getArchitecture()));
         if (os != null) {
           LOGGER.debug("Operating system detected on layer.");
-          layer.setOperatingSystem(os);
+          layerPathWrapper.getLayer().setOperatingSystem(os);
 
           // given all packages detected on the layer this OS reference
-          layer.getPackages().forEach(pkg -> pkg.setOperatingSystem(os));
+          layerPathWrapper.getLayer().getPackages().forEach(pkg -> pkg.setOperatingSystem(os));
         }
       }
   }

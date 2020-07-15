@@ -19,7 +19,7 @@ import static com.rapid7.container.analyzer.docker.model.image.FileType.WHITEOUT
 public class WhiteoutImageHandler implements ImageHandler {
 
   @Override
-  public void handle(Image image) throws IOException {
+  public void handle(Image image) {
 
     // the prefixes of files/directories that have been white-out'ed
     Set<String> whiteoutPrefixes = new HashSet<>();
