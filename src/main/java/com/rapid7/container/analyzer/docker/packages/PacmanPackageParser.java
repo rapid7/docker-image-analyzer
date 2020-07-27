@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 
-public class PacmanPackageParser implements PackageParser<InputStream>{
+public class PacmanPackageParser implements PackageParser<InputStream> {
 
   private static final Pattern PACMAN_DESC_PATTERN = Pattern.compile(".*/lib/pacman/local/(?<name>.*)/desc");
 

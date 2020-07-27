@@ -7,8 +7,6 @@ import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -33,7 +31,7 @@ public class OwaspDependencyParser implements PackageParser<File> {
     settings = owaspDependencyParserSettingsBuilder.build();
   }
 
-  public OwaspDependencyParser(Settings settings){
+  public OwaspDependencyParser(Settings settings) {
     this.settings = settings;
   }
 

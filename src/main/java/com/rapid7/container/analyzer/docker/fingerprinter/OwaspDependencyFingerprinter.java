@@ -23,8 +23,8 @@ public class OwaspDependencyFingerprinter implements LayerFileHandler {
     if (dependencyParser.supports(name, entry)) {
       File tmpFile = Paths.get(layerPathWrapper.getPath(), name).toFile();
       if (tmpFile.isFile()) {
-        layerPathWrapper.getLayer().addPackages(dependencyParser.parse(tmpFile, image.getOperatingSystem() == null ?
-            layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
+        layerPathWrapper.getLayer().addPackages(dependencyParser.parse(tmpFile, image.getOperatingSystem() == null
+            ? layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
       }
     }
   }

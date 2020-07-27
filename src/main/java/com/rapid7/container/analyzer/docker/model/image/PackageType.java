@@ -32,7 +32,7 @@ public enum PackageType {
 
   private final String name;
 
-  PackageType(String name){
+  PackageType(String name) {
     this.name = name;
   }
 

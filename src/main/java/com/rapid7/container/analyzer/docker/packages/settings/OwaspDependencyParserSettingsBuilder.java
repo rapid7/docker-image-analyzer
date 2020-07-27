@@ -128,7 +128,7 @@ public class OwaspDependencyParserSettingsBuilder {
   }
 
   /**
-   * Set other custom properties for tailoring the underlying dependency fingerprinting
+   * Set other custom properties for tailoring the underlying dependency fingerprinting.
    *
    * @param property The property key to enable, from {@link Settings.KEYS}
    * @param value    The property value
