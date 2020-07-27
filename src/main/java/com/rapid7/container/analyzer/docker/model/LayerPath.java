@@ -3,7 +3,7 @@ package com.rapid7.container.analyzer.docker.model;
 import com.rapid7.container.analyzer.docker.model.image.Layer;
 
 /**
- * Wraps a {@link Layer} with the path to it
+ * Wraps a {@link Layer} with the path to it.
  */
 public class LayerPath {
   private final Layer layer;
