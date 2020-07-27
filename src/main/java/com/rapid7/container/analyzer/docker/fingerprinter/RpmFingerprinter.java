@@ -1,9 +1,8 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
-import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
+import com.rapid7.container.analyzer.docker.model.LayerPath;
 import com.rapid7.container.analyzer.docker.model.image.Image;
-import com.rapid7.container.analyzer.docker.model.image.Layer;
 import com.rapid7.container.analyzer.docker.model.json.Configuration;
 import com.rapid7.container.analyzer.docker.packages.RpmPackageParser;
 import java.io.File;
@@ -34,7 +33,7 @@ public class RpmFingerprinter implements LayerFileHandler {
   }
 
   @Override
-  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPathWrapper layerPathWrapper) throws IOException {
+  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPath layerPath) throws IOException {
     if (rpmPackageParser.supports(name, entry)) {
       File directory = Files.createTempDirectory("rpm").toFile();
       try {
@@ -56,7 +55,7 @@ public class RpmFingerprinter implements LayerFileHandler {
             // the --dbpath flag uses a path relative to the root path. we use "." (current directory) since the root path is the full rpmdb path.
             Process process = new ProcessBuilder("/usr/bin/env", "rpm", "--root=" + directory.getAbsolutePath(),"--dbpath=.", "-qa", "--queryformat=" + RPM_QUERY_FORMAT).start();
             LOGGER.info(format("[Image: {}] Parsing RPM output.", image.getId()).getMessage());
-            layerPathWrapper.getLayer().addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
+            layerPath.getLayer().addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layerPath.getLayer().getOperatingSystem() : image.getOperatingSystem()));
             if (!process.waitFor(5, TimeUnit.SECONDS))
               process.destroyForcibly();
           }
@@ -73,10 +72,10 @@ public class RpmFingerprinter implements LayerFileHandler {
             LOGGER.info("stderr: {}", IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8));
           } else {
             LOGGER.info(format("[Image: {}] Parsing RPM output.", image.getId()).getMessage());
-            layerPathWrapper.getLayer().addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
+            layerPath.getLayer().addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layerPath.getLayer().getOperatingSystem() : image.getOperatingSystem()));
             if (!process.waitFor(300, TimeUnit.SECONDS)) // TODO: user configurable?
               process.destroyForcibly();
-            LOGGER.info("Parsed {} packages from layer.", layerPathWrapper.getLayer().getPackages().size());
+            LOGGER.info("Parsed {} packages from layer.", layerPath.getLayer().getPackages().size());
           }
         } else {
           LOGGER.warn("No suitable commands available to fingerprint RPM packages.");

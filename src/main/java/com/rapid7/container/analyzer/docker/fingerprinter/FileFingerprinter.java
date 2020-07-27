@@ -3,12 +3,11 @@ package com.rapid7.container.analyzer.docker.fingerprinter;
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
 import com.rapid7.container.analyzer.docker.model.HashId;
 import com.rapid7.container.analyzer.docker.model.HashType;
-import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
+import com.rapid7.container.analyzer.docker.model.LayerPath;
 import com.rapid7.container.analyzer.docker.model.image.File;
 import com.rapid7.container.analyzer.docker.model.image.FileState;
 import com.rapid7.container.analyzer.docker.model.image.FileType;
 import com.rapid7.container.analyzer.docker.model.image.Image;
-import com.rapid7.container.analyzer.docker.model.image.Layer;
 import com.rapid7.container.analyzer.docker.model.image.LayerFile;
 import com.rapid7.container.analyzer.docker.model.json.Configuration;
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class FileFingerprinter implements LayerFileHandler {
   private static final Pattern WHITEOUT_OPAQUE_AUFS_PREFIX = Pattern.compile("^(?<prefix>.*/)?\\.wh\\.\\.wh\\.\\.opq$");
 
   @Override
-  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPathWrapper layerPathWrapper) throws IOException {
+  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPath layerPath) throws IOException {
 
     // prefix with / to indicate its an absolute path
     name = "/" + name;
@@ -66,7 +65,7 @@ public class FileFingerprinter implements LayerFileHandler {
       file.setChecksum(checksum(contents));
     }
 
-    layerPathWrapper.getLayer().addFile(new LayerFile(file, FileState.ADDED));
+    layerPath.getLayer().addFile(new LayerFile(file, FileState.ADDED));
   }
 
   private HashId checksum(InputStream contents) throws IOException {

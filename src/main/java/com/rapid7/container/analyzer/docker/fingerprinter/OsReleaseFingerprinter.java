@@ -1,9 +1,8 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
-import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
+import com.rapid7.container.analyzer.docker.model.LayerPath;
 import com.rapid7.container.analyzer.docker.model.image.Image;
-import com.rapid7.container.analyzer.docker.model.image.Layer;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.json.Configuration;
 import com.rapid7.container.analyzer.docker.os.Fingerprinter;
@@ -24,16 +23,16 @@ public class OsReleaseFingerprinter implements LayerFileHandler {
   }
 
   @Override
-  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPathWrapper layerPathWrapper) throws IOException {
+  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPath layerPath) throws IOException {
     if (!entry.isSymbolicLink() && FILENAME_PATTERN.matcher(name).matches())
-      if (layerPathWrapper.getLayer().getOperatingSystem() == null || name.endsWith("/os-release")) {
+      if (layerPath.getLayer().getOperatingSystem() == null || name.endsWith("/os-release")) {
         OperatingSystem os = osReleaseParser.parse(contents, name, convert(configuration.getArchitecture()));
         if (os != null) {
           LOGGER.debug("Operating system detected on layer.");
-          layerPathWrapper.getLayer().setOperatingSystem(os);
+          layerPath.getLayer().setOperatingSystem(os);
 
           // given all packages detected on the layer this OS reference
-          layerPathWrapper.getLayer().getPackages().forEach(pkg -> pkg.setOperatingSystem(os));
+          layerPath.getLayer().getPackages().forEach(pkg -> pkg.setOperatingSystem(os));
         }
       }
   }

@@ -1,7 +1,7 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
-import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
+import com.rapid7.container.analyzer.docker.model.LayerPath;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.json.Configuration;
 import com.rapid7.container.analyzer.docker.packages.ApkgParser;
@@ -18,9 +18,9 @@ public class ApkgFingerprinter implements LayerFileHandler {
   }
 
   @Override
-  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPathWrapper layerPathWrapper) throws IOException {
+  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPath layerPath) throws IOException {
     if (apkgParser.supports(name, entry)) {
-      layerPathWrapper.getLayer().addPackages(apkgParser.parse(contents, image.getOperatingSystem() == null ? layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
+      layerPath.getLayer().addPackages(apkgParser.parse(contents, image.getOperatingSystem() == null ? layerPath.getLayer().getOperatingSystem() : image.getOperatingSystem()));
     }
   }
 }

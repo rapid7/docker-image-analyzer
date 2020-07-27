@@ -1,7 +1,7 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
-import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
+import com.rapid7.container.analyzer.docker.model.LayerPath;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.json.Configuration;
 import com.rapid7.container.analyzer.docker.packages.OwaspDependencyParser;
@@ -19,12 +19,12 @@ public class OwaspDependencyFingerprinter implements LayerFileHandler {
   }
 
   @Override
-  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPathWrapper layerPathWrapper) throws IOException {
+  public void handle(String name, TarArchiveEntry entry, InputStream contents, Image image, Configuration configuration, LayerPath layerPath) throws IOException {
     if (dependencyParser.supports(name, entry)) {
-      File tmpFile = Paths.get(layerPathWrapper.getPath(), name).toFile();
+      File tmpFile = Paths.get(layerPath.getPath(), name).toFile();
       if (tmpFile.isFile()) {
-        layerPathWrapper.getLayer().addPackages(dependencyParser.parse(tmpFile, image.getOperatingSystem() == null
-            ? layerPathWrapper.getLayer().getOperatingSystem() : image.getOperatingSystem()));
+        layerPath.getLayer().addPackages(dependencyParser.parse(tmpFile, image.getOperatingSystem() == null
+            ? layerPath.getLayer().getOperatingSystem() : image.getOperatingSystem()));
       }
     }
   }

@@ -2,11 +2,14 @@ package com.rapid7.container.analyzer.docker.model;
 
 import com.rapid7.container.analyzer.docker.model.image.Layer;
 
-public class LayerPathWrapper {
+/**
+ * Wraps a {@link Layer} with the path to it
+ */
+public class LayerPath {
   private final Layer layer;
   private final String basePath;
 
-  public LayerPathWrapper(String basePath, Layer layer) {
+  public LayerPath(String basePath, Layer layer) {
     this.basePath = basePath;
     this.layer = layer;
   }

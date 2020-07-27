@@ -60,8 +60,6 @@ public class OwaspDependencyParser implements PackageParser<File> {
     if (dependency.getName() == null || dependency.getVersion() == null) {
       return null;
     }
-    // TODO - How to set source?
-    // todo - How to set maintainer? homepage? Do we care??
     return new Package(dependency.getFileName(),
         PackageType.fromString(dependency.getEcosystem()),
         null,

@@ -16,7 +16,6 @@ class DockerImageAnalyzerServiceTest {
 
   @Test
   public void test() throws IOException {
-    Logger.getGlobal().setLevel(Level.ALL);
     // Given
     File tarFile = new File(getClass().getClassLoader().getResource("containers/fakealpine.tar").getFile());
     ImageId expectedId = new ImageId("sha256:7be494284b1dea6cb2012a5ef99676b4ec22868d9ee235c60e48181542d70fd5");

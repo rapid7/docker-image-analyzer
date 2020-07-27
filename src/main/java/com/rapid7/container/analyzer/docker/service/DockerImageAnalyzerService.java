@@ -16,7 +16,7 @@ import com.rapid7.container.analyzer.docker.fingerprinter.PacmanFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.RpmFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.WhiteoutImageHandler;
 import com.rapid7.container.analyzer.docker.model.Digest;
-import com.rapid7.container.analyzer.docker.model.LayerPathWrapper;
+import com.rapid7.container.analyzer.docker.model.LayerPath;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.image.ImageId;
 import com.rapid7.container.analyzer.docker.model.image.ImageType;
@@ -350,7 +350,7 @@ public class DockerImageAnalyzerService {
           try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(bigFile), 65536)) {
             inputStream.mark((int) (bigFile.getTotalSpace() + 1));
             for (LayerFileHandler handler : layerHandlers) {
-              handler.handle(name, entry, inputStream, image, configuration, new LayerPathWrapper(tar.getParent(), layer));
+              handler.handle(name, entry, inputStream, image, configuration, new LayerPath(tar.getParent(), layer));
               inputStream.reset();
             }
           }
@@ -366,7 +366,7 @@ public class DockerImageAnalyzerService {
           IOUtils.copy(tarIn, out);
           InputStream contents = out.toInputStream();
           for (LayerFileHandler handler : layerHandlers) {
-            handler.handle(name, entry, contents, image, configuration, new LayerPathWrapper(tar.getParent(), layer));
+            handler.handle(name, entry, contents, image, configuration, new LayerPath(tar.getParent(), layer));
             contents.reset();
           }
         }
