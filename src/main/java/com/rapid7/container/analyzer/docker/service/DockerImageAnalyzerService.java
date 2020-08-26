@@ -279,7 +279,7 @@ public class DockerImageAnalyzerService {
           continue;
         }
 
-        LOGGER.debug(arrayFormat("[Image: {}] Extracting {} {}.", new Object[]{tar.getName(), entry.isDirectory() ? "directory" : "file", file.getAbsolutePath()}).getMessage());
+        LOGGER.debug(arrayFormat("[Image: {}] Extracting {} {}.", new Object[] {tar.getName(), entry.isDirectory() ? "directory" : "file", file.getAbsolutePath()}).getMessage());
 
         long usableSpace = file.getParentFile().getFreeSpace();
         long objectSize = entry.getRealSize();
@@ -325,51 +325,37 @@ public class DockerImageAnalyzerService {
     while ((entry = tarIn.getNextTarEntry()) != null) {
       String name = entry.getName();
       if (LOGGER.isTraceEnabled())
-        LOGGER.trace(arrayFormat("[Image: {}] Processing {} {}.", new Object[]{tar.getName(), entry.isDirectory() ? "directory" : "file", name}).getMessage());
+        LOGGER.trace(arrayFormat("[Image: {}] Processing {} {}.", new Object[] {tar.getName(), entry.isDirectory() ? "directory" : "file", name}).getMessage());
 
-      // extract 25 MB+ files instead of reading fully into memory
-      if (entry.getSize() > MAX_READ_FILE_SIZE) {
-        if (entry.getSize() > MAX_EXTRACT_FILE_SIZE) {
-          LOGGER.debug("Skipping file {} with size {} bytes because exceeds max of {} bytes.", name, entry.getSize(), MAX_EXTRACT_FILE_SIZE);
+      if (entry.getSize() > MAX_EXTRACT_FILE_SIZE) {
+        LOGGER.debug("Skipping file {} with size {} bytes because exceeds max of {} bytes.", name, entry.getSize(), MAX_EXTRACT_FILE_SIZE);
+        continue;
+      }
+
+      LOGGER.debug(format("Extracting large file {} ({} bytes)", entry.getName(), entry.getSize()).getMessage());
+      File bigFile = new File(tar.getParentFile(), entry.getName());
+      try {
+        if (!bigFile.toPath().toAbsolutePath().normalize().startsWith(bigFile.getParentFile().toPath().toAbsolutePath().normalize())) {
+          LOGGER.debug(format("[Image: {}] Skipping extraction of {} due to directory traversal.", tar.getName(), name).getMessage());
           continue;
         }
 
-        LOGGER.debug(format("Extracting large file {} ({} bytes)", entry.getName(), entry.getSize()).getMessage());
-        File bigFile = new File(tar.getParentFile(), entry.getName());
-        try {
-          if (!bigFile.toPath().toAbsolutePath().normalize().startsWith(bigFile.getParentFile().toPath().toAbsolutePath().normalize())) {
-            LOGGER.debug(format("[Image: {}] Skipping extraction of {} due to directory traversal.", tar.getName(), name).getMessage());
-            continue;
-          }
-
-          bigFile.getParentFile().mkdirs();
-          try (FileOutputStream outputStream = new FileOutputStream(bigFile)) {
-            IOUtils.copy(tarIn, outputStream);
-          }
-
-          try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(bigFile), 65536)) {
-            inputStream.mark((int) (bigFile.getTotalSpace() + 1));
-            for (LayerFileHandler handler : layerHandlers) {
-              handler.handle(name, entry, inputStream, image, configuration, new LayerPath(tar.getParent(), layer));
-              inputStream.reset();
-            }
-          }
-        } catch (IOException ioe) {
-          LOGGER.info("Failed to handle file {}", entry.getName(), ioe);
-        } finally {
-          bigFile.delete();
+        bigFile.getParentFile().mkdirs();
+        try (FileOutputStream outputStream = new FileOutputStream(bigFile)) {
+          IOUtils.copy(tarIn, outputStream);
         }
-      }
-      else {
-        // read small files in memory
-        try (ConvertibleOutputStream out = new ConvertibleOutputStream((int) entry.getSize())) {
-          IOUtils.copy(tarIn, out);
-          InputStream contents = out.toInputStream();
+
+        try (BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(bigFile), 65536)) {
+          inputStream.mark((int) (bigFile.getTotalSpace() + 1));
           for (LayerFileHandler handler : layerHandlers) {
-            handler.handle(name, entry, contents, image, configuration, new LayerPath(tar.getParent(), layer));
-            contents.reset();
+            handler.handle(name, entry, inputStream, image, configuration, new LayerPath(tar.getParent(), layer));
+            inputStream.reset();
           }
         }
+      } catch (IOException ioe) {
+        LOGGER.info("Failed to handle file {}", entry.getName(), ioe);
+      } finally {
+        bigFile.delete();
       }
     }
   }
@@ -378,6 +364,7 @@ public class DockerImageAnalyzerService {
     public ConvertibleOutputStream(int size) {
       super(size);
     }
+
     // Creates InputStream without actually copying the buffer and using up memory for that.
     public InputStream toInputStream() {
       return new ByteArrayInputStream(buf, 0, count);
