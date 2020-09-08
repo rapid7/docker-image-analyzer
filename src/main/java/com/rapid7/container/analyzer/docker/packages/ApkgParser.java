@@ -2,8 +2,9 @@ package com.rapid7.container.analyzer.docker.packages;
 
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import java.util.regex.Pattern;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 
-public class ApkgParser extends PackageParser {
+public class ApkgParser extends PatternPackageParser {
 
   private static final Pattern APKG_PATTERN = Pattern.compile("(?<name>.*):(?<value>.*)");
 
@@ -50,5 +51,10 @@ public class ApkgParser extends PackageParser {
         return "I";
       }
     });
+  }
+
+  @Override
+  public boolean supports(String name, TarArchiveEntry entry) {
+    return !entry.isSymbolicLink() && name.endsWith("lib/apk/db/installed");
   }
 }
