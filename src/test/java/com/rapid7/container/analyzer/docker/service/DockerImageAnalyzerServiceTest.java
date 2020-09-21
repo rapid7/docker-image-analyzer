@@ -38,12 +38,12 @@ class DockerImageAnalyzerServiceTest {
   @Test
   public void testCentos() throws IOException {
     // Given
-    File tarFile = new File(getClass().getClassLoader().getResource("containers/test_image_centos.tar").getFile());
-    ImageId expectedId = new ImageId("sha256:48650444e4191276a912ac90816a4ce1e86f76419e004d445a2e42809fec05f7");
-    OperatingSystem expectedOs = new OperatingSystem("Red Hat", "Linux", "Linux", "x86_64", null, "Red Hat Linux");
-    long expectedSize = 201543168;
+    File tarFile = new File(getClass().getClassLoader().getResource("containers/centos/test_image_centos.tar").getFile());
+    ImageId expectedId = new ImageId("sha256:bcbdfe9aa33a028bedc671ecfe56ce628ff64a8ad1b2fa46855c03955fcdc5bf");
+    long expectedSize = 72704;
+    // omit OS check because this image tar was built from scratch
     long expectedLayers = 3;
-    long expectedPackages = 138;
+    long expectedPackages = 1;
 
     // When
     DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null);
@@ -52,9 +52,9 @@ class DockerImageAnalyzerServiceTest {
 
     // Then
     assertEquals(expectedId, image.getId());
-    assertEquals(expectedOs, image.getOperatingSystem());
     assertEquals(expectedSize, image.getSize());
     assertEquals(expectedLayers, image.getLayers().size());
     assertEquals(expectedPackages, image.getPackages().size());
+    assertEquals("A set of system configuration and setup files", image.getPackages().stream().findFirst().get().getDescription());
   }
 }
