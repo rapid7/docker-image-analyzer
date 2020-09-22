@@ -53,7 +53,7 @@ public class RpmFingerprinter implements LayerFileHandler {
           synchronized (this) {
             // the --root flag sets the path which all rpm commands use as base for relative paths.
             // the --dbpath flag uses a path relative to the root path. we use "." (current directory) since the root path is the full rpmdb path.
-            Process process = new ProcessBuilder("/usr/bin/env", "rpm", "--root=" + directory.getAbsolutePath(),"--dbpath=.", "-qa", "--queryformat=" + RPM_QUERY_FORMAT).start();
+            Process process = new ProcessBuilder("/usr/bin/env", "rpm", "--root=" + directory.getAbsolutePath(),"--dbpath=/", "-qa", "--queryformat=" + RPM_QUERY_FORMAT).start();
             LOGGER.info(format("[Image: {}] Parsing RPM output.", image.getId()).getMessage());
             layerPath.getLayer().addPackages(rpmPackageParser.parse(process.getInputStream(), image.getOperatingSystem() == null ? layerPath.getLayer().getOperatingSystem() : image.getOperatingSystem()));
             if (!process.waitFor(5, TimeUnit.SECONDS))
@@ -64,7 +64,7 @@ public class RpmFingerprinter implements LayerFileHandler {
           String rpmImage = (rpmDockerImage == null || rpmDockerImage.isEmpty()) ? DEFAULT_DOCKER_IMAGE : rpmDockerImage;
           LOGGER.info("Using docker image '{}' to execute RPM command.", rpmImage);
           Process process = new ProcessBuilder("/usr/bin/env", "docker", "run", "--rm","--mount", "type=bind,source=" + directory.getAbsolutePath() + ",target=/rpm",
-              rpmImage, "rpm", "--root=/rpm", "--dbpath=.", "-qa", "--queryformat=" + RPM_QUERY_FORMAT).start();
+              rpmImage, "rpm", "--root=/rpm", "--dbpath=/", "-qa", "--queryformat=" + RPM_QUERY_FORMAT).start();
           process.waitFor(300, TimeUnit.SECONDS);
           if (process.exitValue() != 0) {
             LOGGER.error("Docker exection failed with exit code {}.", process.exitValue());

@@ -7,15 +7,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DockerImageAnalyzerServiceTest {
 
   @Test
-  public void test() throws IOException {
+  public void testAlpine() throws IOException {
     // Given
     File tarFile = new File(getClass().getClassLoader().getResource("containers/fakealpine.tar").getFile());
     ImageId expectedId = new ImageId("sha256:7be494284b1dea6cb2012a5ef99676b4ec22868d9ee235c60e48181542d70fd5");
@@ -35,5 +34,28 @@ class DockerImageAnalyzerServiceTest {
     assertEquals(expectedSize, image.getSize());
     assertEquals(expectedLayers, image.getLayers().size());
     assertEquals(expectedPackages, image.getPackages().size());
+  }
+
+  @Test
+  public void testCentos() throws IOException {
+    // Given
+    File tarFile = new File(getClass().getClassLoader().getResource("containers/centos/test_image_centos.tar").getFile());
+    ImageId expectedId = new ImageId("sha256:bcbdfe9aa33a028bedc671ecfe56ce628ff64a8ad1b2fa46855c03955fcdc5bf");
+    long expectedSize = 72704;
+    // omit OS check because this image tar was built from scratch
+    long expectedLayers = 3;
+    long expectedPackages = 1;
+
+    // When
+    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null);
+    Path tmpdir = Files.createTempDirectory("r7dia");
+    Image image = analyzer.analyze(tarFile, tmpdir.toString());
+
+    // Then
+    assertEquals(expectedId, image.getId());
+    assertEquals(expectedSize, image.getSize());
+    assertEquals(expectedLayers, image.getLayers().size());
+    assertEquals(expectedPackages, image.getPackages().size());
+    assertEquals("A set of system configuration and setup files", image.getPackages().stream().findFirst().get().getDescription());
   }
 }
