@@ -77,6 +77,10 @@ public class DockerImageAnalyzerService {
   private List<ImageHandler> imageHandlers;
 
   public DockerImageAnalyzerService(String rpmDockerImage) {
+    this(rpmDockerImage, OwaspDependencyParserSettingsBuilder.EXPERIMENTAL);
+  }
+
+  public DockerImageAnalyzerService(String rpmDockerImage, OwaspDependencyParserSettingsBuilder builder) {
     objectMapper = new ObjectMapper();
     objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     objectMapper.registerModule(new InstantParserModule());
@@ -88,7 +92,7 @@ public class DockerImageAnalyzerService {
     layerHandlers.add(new DpkgFingerprinter(new DpkgParser()));
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
     layerHandlers.add(new PacmanFingerprinter(new PacmanPackageParser()));
-    layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(OwaspDependencyParserSettingsBuilder.EXPERIMENTAL)));
+    layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(builder)));
   }
 
   public void addFileHandler(LayerFileHandler handler) {
