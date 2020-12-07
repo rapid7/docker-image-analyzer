@@ -75,6 +75,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
       <version>${jackson.version}</version>
@@ -114,12 +120,12 @@
       <groupId>org.owasp</groupId>
       <artifactId>dependency-check-core</artifactId>
       <version>${dependency.check.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>commons-beanutils</artifactId>
-          <groupId>commons-beanutils</groupId>
-        </exclusion>
-      </exclusions>
+<!--      <exclusions>-->
+<!--        <exclusion>-->
+<!--          <artifactId>commons-beanutils</artifactId>-->
+<!--          <groupId>commons-beanutils</groupId>-->
+<!--        </exclusion>-->
+<!--      </exclusions>-->
     </dependency>
 
     <dependency>
