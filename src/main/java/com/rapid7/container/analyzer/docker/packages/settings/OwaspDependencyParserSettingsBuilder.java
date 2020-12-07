@@ -91,7 +91,7 @@ public class OwaspDependencyParserSettingsBuilder {
 
   /**
    * Sets the property required for the {@link Analyzer} to be enabled.
-   * </p>
+   * <p>
    * If the analyzer is {@link Analyzer#isExperimental()}
    * experimental analyzers must be explicitly enabled with {@link #allowExperimentalAnalyzers()} ()} prior to
    * calling {@link #build()} for the analyzer to be enabled.
@@ -110,7 +110,7 @@ public class OwaspDependencyParserSettingsBuilder {
 
   /**
    * Sets the properties required for the array of {@link Analyzer} to be enabled.
-   * </p>
+   * <p>
    * If any analyzer is {@link Analyzer#isExperimental()}
    * experimental analyzers must be explicitly enabled with {@link #allowExperimentalAnalyzers()} ()} prior to
    * calling {@link #build()} for the analyzer to be enabled.
