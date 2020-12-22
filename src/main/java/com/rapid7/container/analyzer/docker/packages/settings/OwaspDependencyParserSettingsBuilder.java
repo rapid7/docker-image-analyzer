@@ -55,6 +55,7 @@ public class OwaspDependencyParserSettingsBuilder {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OwaspDependencyParserSettingsBuilder.class);
   private static final String TRUE = "true";
+  private static final String FALSE = "false";
   private final Set<Analyzer> enabledAnalyzers;
   private final Map<String, Object> additionalProperties;
   private boolean useExperimentalAnalyzers;
@@ -147,18 +148,28 @@ public class OwaspDependencyParserSettingsBuilder {
     if (useRetiredAnalyzers) {
       properties.put(Settings.KEYS.ANALYZER_RETIRED_ENABLED, TRUE);
     }
-    for (Analyzer analyzer : enabledAnalyzers) {
-      if (analyzer.isExperimental()) {
-        if (!useExperimentalAnalyzers) {
-          LOGGER.info(format("The experimental analyzer \"%s\" will not be enabled as allowExperimentalAnalyzers() has not been set", analyzer.getName()));
-        }
-        if (analyzer.isRetired()) {
-          if (!useRetiredAnalyzers) {
-            LOGGER.info(format("The retired analyzer \"%s\" will not be enabled as allowRetiredAnalyzers() has not been set", analyzer.getName()));
+
+    for (Analyzer analyzer : Analyzer.values()) {
+      if (enabledAnalyzers.contains(analyzer)) {
+        if (analyzer.isExperimental()) {
+          if (useExperimentalAnalyzers)
+            properties.put(analyzer.getToggleKey(), TRUE);
+          else {
+            LOGGER.info(format("The experimental analyzer \"%s\" will not be enabled as allowExperimentalAnalyzers() has not been set", analyzer.getName()));
+            properties.put(analyzer.getToggleKey(), FALSE);
           }
         }
-      }
-      properties.put(analyzer.getToggleKey(), TRUE);
+        if (analyzer.isRetired()) {
+          if (useRetiredAnalyzers)
+            properties.put(analyzer.getToggleKey(), TRUE);
+          else {
+            LOGGER.info(format("The retired analyzer \"%s\" will not be enabled as allowRetiredAnalyzers() has not been set", analyzer.getName()));
+            properties.put(analyzer.getToggleKey(), FALSE);
+          }
+        }
+        properties.put(analyzer.getToggleKey(), TRUE);
+      } else
+        properties.put(analyzer.getToggleKey(), FALSE);
     }
     properties.putAll(additionalProperties);
     return new Settings(properties);
