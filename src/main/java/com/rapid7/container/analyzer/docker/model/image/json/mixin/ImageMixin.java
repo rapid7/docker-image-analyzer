@@ -68,7 +68,7 @@ public abstract class ImageMixin extends Image {
 
   @Override
   @JsonIgnore
-  public abstract Layer getPackageLayer();
+  public abstract List<Layer> getPackageLayer();
 
   @Override
   @JsonIgnore

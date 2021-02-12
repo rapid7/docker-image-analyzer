@@ -9,14 +9,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class Image {
 
+  private static final Set<String> OS_PACKAGES = Stream.of("APK", "APKG", "DPKG", "PACMAN", "RPM").collect(Collectors.toSet());
   protected ImageId id;
   protected Set<Digest> digests;
   protected ImageType type;
@@ -76,8 +81,22 @@ public class Image {
     return layers.get(id);
   }
 
-  public Layer getPackageLayer() {
-    return layers.values().stream().filter(l -> !l.getPackages().isEmpty()).reduce((layer1, layer2) -> layer2).orElse(null);
+  public List<Layer> getPackageLayer() {
+
+    List<Layer> topLayers = new ArrayList<>();
+
+    Layer[] values = layers.values().toArray(new Layer[layers.values().size()]);
+    for (int i = values.length - 1; i >= 0; i--) {
+      Layer layer = values[i];
+      if (!layer.isEmpty() && layer.isPackageLayer()) {
+        if (layer.getPackages().stream().anyMatch(pkg -> OS_PACKAGES.contains(pkg.getType().toString().toUpperCase()))) {
+          topLayers.add(layer);
+          break;
+        }
+        topLayers.add(layer);
+      }
+    }
+    return topLayers;
   }
 
   public ImageId getId() {
@@ -126,8 +145,8 @@ public class Image {
   }
 
   public List<LayerFile> getFiles() {
-    Layer layer = getPackageLayer();
-    return layer == null ? emptyList() : layer.getFiles();
+    List<Layer> layers = getPackageLayer();
+    return layers == null ? emptyList() : layers.stream().map(Layer::getFiles).flatMap(List::stream).collect(toList());
   }
 
   public List<Layer> getLayers() {
@@ -135,8 +154,8 @@ public class Image {
   }
 
   public Set<Package> getPackages() {
-    Layer layer = getPackageLayer();
-    return layer == null ? emptySet() : layer.getPackages();
+    List<Layer> layers = getPackageLayer();
+    return layers == null ? emptySet() : layers.stream().map(Layer::getPackages).flatMap(Set::stream).collect(toSet());
   }
 
   public OperatingSystem getOperatingSystem() {
@@ -152,7 +171,7 @@ public class Image {
     if (obj == this)
       return true;
     else if (obj instanceof Image) {
-      Image other = (Image)obj;
+      Image other = (Image) obj;
       return Objects.equals(id, other.id);
     } else
       return false;
