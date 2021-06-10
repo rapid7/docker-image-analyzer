@@ -24,7 +24,7 @@ public class OwaspDependencyParser implements PackageParser<File> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OwaspDependencyFingerprinter.class);
   // TODO - Create this pattern from enabled analyzers? Would need changes in the OWASP DependencyCheck library
-  private static final Pattern OWASP_DEPENDENCY_SUPPORTED_PATTERN = Pattern.compile(".*(?i)(\\.(jar|war|aar|gemspec|py|egg|zip|ear|sar|apk|nupkg|tar|gz|tgz|bz2|tbz2|whl|nuspec))|.*(?i)(Gopkg.lock|Gemfile.lock|packages.config)$");
+  private static final Pattern OWASP_DEPENDENCY_SUPPORTED_PATTERN = Pattern.compile(".*(?i)(\\.(jar|war|aar|gemspec|py|egg|zip|ear|sar|apk|nupkg|tar|gz|tgz|bz2|tbz2|whl|nuspec))|.*(?i)(Gopkg.lock|Gemfile.lock|packages.config|package.json)$");
   private final Settings settings;
 
   public OwaspDependencyParser(OwaspDependencyParserSettingsBuilder owaspDependencyParserSettingsBuilder) {
