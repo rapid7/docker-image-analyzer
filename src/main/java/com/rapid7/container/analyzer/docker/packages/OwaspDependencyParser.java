@@ -60,6 +60,8 @@ public class OwaspDependencyParser implements PackageParser<File> {
     if (dependency.getName() == null || dependency.getVersion() == null) {
       return null;
     }
+    LOGGER.info("Dependency: {}", dependency);
+    LOGGER.info("Ecosystem: {}", dependency.getEcosystem());
     return new Package(dependency.getFileName(),
         PackageType.fromString(dependency.getEcosystem()),
         null,
