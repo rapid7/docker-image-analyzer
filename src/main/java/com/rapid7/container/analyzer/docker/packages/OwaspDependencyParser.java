@@ -57,10 +57,10 @@ public class OwaspDependencyParser implements PackageParser<File> {
   }
 
   private Package convertDependencyToPackage(Dependency dependency) {
-    if (dependency.getName() == null || dependency.getVersion() == null) {
+    if (dependency.getName() == null || dependency.getVersion() == null || dependency.getEcosystem() == null) {
+      LOGGER.info("Dependency: {}", dependency);
       return null;
     }
-    LOGGER.info("Dependency: {}", dependency);
     LOGGER.info("Ecosystem: {}", dependency.getEcosystem());
     return new Package(dependency.getFileName(),
         PackageType.fromString(dependency.getEcosystem()),
