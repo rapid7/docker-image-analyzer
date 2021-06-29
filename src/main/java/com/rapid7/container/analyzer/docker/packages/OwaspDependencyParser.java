@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import static java.util.stream.Collectors.toSet;
 import static org.owasp.dependencycheck.Engine.Mode.EVIDENCE_COLLECTION;
-import static org.owasp.dependencycheck.Engine.Mode.EVIDENCE_PROCESSING;
-import static org.owasp.dependencycheck.Engine.Mode.STANDALONE;
 
 public class OwaspDependencyParser implements PackageParser<File> {
 
