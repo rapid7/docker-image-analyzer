@@ -24,7 +24,7 @@ public class OwaspDependencyParser implements PackageParser<File> {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(OwaspDependencyFingerprinter.class);
   // TODO - Create this pattern from enabled analyzers? Would need changes in the OWASP DependencyCheck library
-  private static final Pattern OWASP_DEPENDENCY_SUPPORTED_PATTERN = Pattern.compile(".*(?i)(\\.(jar|war|aar|gemspec|py|egg|zip|ear|sar|apk|nupkg|tar|gz|tgz|bz2|tbz2|whl|nuspec))|.*(?i)(Gopkg.lock|Gemfile.lock|packages.config|package.json)$");
+  private static final Pattern OWASP_DEPENDENCY_SUPPORTED_PATTERN = Pattern.compile(".*(?i)(\\.(jar|war|aar|gemspec|py|egg|zip|ear|sar|apk|nupkg|tar|gz|tgz|bz2|tbz2|whl|nuspec))|.*(?i)(Gopkg.lock|Gemfile.lock|packages.config|package.json|package-lock.json)$");
   private final Settings settings;
 
   public OwaspDependencyParser(OwaspDependencyParserSettingsBuilder owaspDependencyParserSettingsBuilder) {
@@ -58,10 +58,8 @@ public class OwaspDependencyParser implements PackageParser<File> {
 
   private Package convertDependencyToPackage(Dependency dependency) {
     if (dependency.getName() == null || dependency.getVersion() == null || dependency.getEcosystem() == null) {
-      LOGGER.info("Dependency: {}", dependency);
       return null;
     }
-    LOGGER.info("Ecosystem: {}", dependency.getEcosystem());
     return new Package(dependency.getFileName(),
         PackageType.fromString(dependency.getEcosystem()),
         null,
