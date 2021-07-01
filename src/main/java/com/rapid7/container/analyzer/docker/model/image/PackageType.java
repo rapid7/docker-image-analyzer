@@ -44,7 +44,19 @@ public enum PackageType {
       .collect(toMap(type -> type.getName().toLowerCase(), type -> type));
 
   public static PackageType fromString(String string) {
-    return packageTypeByName.getOrDefault(string.toLowerCase(), UNKNOWN);
+    PackageType overloadedMapping = getPackageTypeOverload(string);
+    if (overloadedMapping != null) {
+      return overloadedMapping;
+    } else {
+      return packageTypeByName.getOrDefault(string.toLowerCase(), UNKNOWN);
+    }
+  }
+
+  private static PackageType getPackageTypeOverload(String string) {
+    if ("NPM".equalsIgnoreCase(string)) {
+      return NODEJS;
+    }
+    return null;
   }
 
   @Override
