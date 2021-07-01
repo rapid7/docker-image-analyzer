@@ -4,7 +4,7 @@
 
   <groupId>com.rapid7.docker</groupId>
   <artifactId>docker-image-analyzer</artifactId>
-  <version>0.2.10</version>
+  <version>0.2.11-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>docker-image-analyzer</name>
   <url>https://www.rapid7.com</url>
@@ -14,7 +14,7 @@
     <connection>scm:git:git@github.com:rapid7/docker-image-analyzer.git</connection>
     <developerConnection>scm:git:git@github.com:rapid7/docker-image-analyzer.git</developerConnection>
     <url>https://github.com/rapid7/docker-image-analyzer</url>
-    <tag>docker-image-analyzer-0.2.10</tag>
+    <tag>0.2.7</tag>
   </scm>
 
   <developers>
