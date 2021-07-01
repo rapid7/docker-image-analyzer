@@ -50,6 +50,7 @@ public class OwaspDependencyParser implements PackageParser<File> {
         exceptionCollection.getExceptions().forEach(e -> LOGGER.error("Failed analyzing dependencies", e));
       }
       return Arrays.stream(engine.getDependencies())
+          .filter(Objects::nonNull)
           .map(this::convertDependencyToPackage)
           .filter(Objects::nonNull)
           .collect(toSet());
