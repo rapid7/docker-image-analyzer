@@ -78,11 +78,11 @@ public class OwaspDependencyParser implements PackageParser<File> {
     if (version == null) {
       return null;
     }
-    if (version.startsWith("\\\"")) {
-      version = version.substring(2);
+    while (version.startsWith("\\") || version.startsWith("\"")) {
+      version = version.substring(1);
     }
-    if (version.endsWith("\\\"")) {
-      version = version.substring(0, version.length() - 2);
+    while (version.endsWith("\\") || version.endsWith("\"")) {
+      version = version.substring(0, version.length() - 1);
     }
     return version;
   }
