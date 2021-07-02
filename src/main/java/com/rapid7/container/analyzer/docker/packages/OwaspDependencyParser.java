@@ -65,11 +65,25 @@ public class OwaspDependencyParser implements PackageParser<File> {
         PackageType.fromString(dependency.getEcosystem()),
         null,
         dependency.getName(),
-        dependency.getVersion(),
+        fixVersion(dependency.getVersion()),
         dependency.getDescription(),
         0L,
         null,
         null,
         dependency.getLicense());
+  }
+
+  // Fixing versions like \"0.0.1-security\" to 0.0.1-security
+  private String fixVersion(String version) {
+    if (version == null) {
+      return null;
+    }
+    if (version.startsWith("\\\"")) {
+      version = version.substring(2);
+    }
+    if (version.endsWith("\\\"")) {
+      version = version.substring(0, version.length() - 2);
+    }
+    return version;
   }
 }
