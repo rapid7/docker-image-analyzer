@@ -54,7 +54,7 @@ public enum PackageType {
 
   private static PackageType getPackageTypeOverload(String string) {
     if ("NPM".equalsIgnoreCase(string)) {
-      return NODEJS;
+      return JAVASCRIPT;
     }
     return null;
   }
