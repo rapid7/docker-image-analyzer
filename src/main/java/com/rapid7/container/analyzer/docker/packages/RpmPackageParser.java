@@ -1,6 +1,6 @@
 package com.rapid7.container.analyzer.docker.packages;
 
-import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.docker.model.image.PackageType;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 

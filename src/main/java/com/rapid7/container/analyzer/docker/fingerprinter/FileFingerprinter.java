@@ -1,28 +1,28 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
-import com.rapid7.container.analyzer.docker.model.HashId;
-import com.rapid7.container.analyzer.docker.model.HashType;
-import com.rapid7.container.analyzer.docker.model.LayerPath;
-import com.rapid7.container.analyzer.docker.model.image.File;
-import com.rapid7.container.analyzer.docker.model.image.FileState;
-import com.rapid7.container.analyzer.docker.model.image.FileType;
-import com.rapid7.container.analyzer.docker.model.image.Image;
-import com.rapid7.container.analyzer.docker.model.image.LayerFile;
-import com.rapid7.container.analyzer.docker.model.json.Configuration;
+import com.rapid7.docker.model.HashId;
+import com.rapid7.docker.model.HashType;
+import com.rapid7.docker.model.LayerPath;
+import com.rapid7.docker.model.image.File;
+import com.rapid7.docker.model.image.FileState;
+import com.rapid7.docker.model.image.FileType;
+import com.rapid7.docker.model.image.Image;
+import com.rapid7.docker.model.image.LayerFile;
+import com.rapid7.docker.model.json.Configuration;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.BLOCK_DEVICE;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.CHARACTER_DEVICE;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.DIRECTORY;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.REGULAR_FILE;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.SYMBOLIC_LINK;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.WHITEOUT;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.WHITEOUT_OPAQUE;
+import static com.rapid7.docker.model.image.FileType.BLOCK_DEVICE;
+import static com.rapid7.docker.model.image.FileType.CHARACTER_DEVICE;
+import static com.rapid7.docker.model.image.FileType.DIRECTORY;
+import static com.rapid7.docker.model.image.FileType.REGULAR_FILE;
+import static com.rapid7.docker.model.image.FileType.SYMBOLIC_LINK;
+import static com.rapid7.docker.model.image.FileType.WHITEOUT;
+import static com.rapid7.docker.model.image.FileType.WHITEOUT_OPAQUE;
 
 
 public class FileFingerprinter implements LayerFileHandler {

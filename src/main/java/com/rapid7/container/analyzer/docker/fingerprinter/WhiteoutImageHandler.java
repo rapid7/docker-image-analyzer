@@ -1,20 +1,19 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.ImageHandler;
-import com.rapid7.container.analyzer.docker.model.image.File;
-import com.rapid7.container.analyzer.docker.model.image.Image;
-import com.rapid7.container.analyzer.docker.model.image.Layer;
-import com.rapid7.container.analyzer.docker.model.image.LayerFile;
-import java.io.IOException;
+import com.rapid7.docker.model.image.File;
+import com.rapid7.docker.model.image.Image;
+import com.rapid7.docker.model.image.Layer;
+import com.rapid7.docker.model.image.LayerFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import static com.rapid7.container.analyzer.docker.model.image.FileState.REMOVED;
-import static com.rapid7.container.analyzer.docker.model.image.FileState.UPDATED;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.WHITEOUT;
-import static com.rapid7.container.analyzer.docker.model.image.FileType.WHITEOUT_OPAQUE;
+import static com.rapid7.docker.model.image.FileState.REMOVED;
+import static com.rapid7.docker.model.image.FileState.UPDATED;
+import static com.rapid7.docker.model.image.FileType.WHITEOUT;
+import static com.rapid7.docker.model.image.FileType.WHITEOUT_OPAQUE;
 
 public class WhiteoutImageHandler implements ImageHandler {
 

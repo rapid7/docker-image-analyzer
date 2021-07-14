@@ -1,6 +1,6 @@
 package com.rapid7.container.analyzer.docker.analyzer;
 
-import com.rapid7.container.analyzer.docker.model.image.LayerId;
+import com.rapid7.docker.model.image.LayerId;
 import java.io.File;
 import java.io.IOException;
 

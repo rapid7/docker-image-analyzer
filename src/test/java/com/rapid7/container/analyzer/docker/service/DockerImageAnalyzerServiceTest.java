@@ -1,13 +1,12 @@
 package com.rapid7.container.analyzer.docker.service;
 
-import com.rapid7.container.analyzer.docker.model.image.Image;
-import com.rapid7.container.analyzer.docker.model.image.ImageId;
-import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
+import com.rapid7.docker.model.image.Image;
+import com.rapid7.docker.model.image.ImageId;
+import com.rapid7.docker.model.image.OperatingSystem;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

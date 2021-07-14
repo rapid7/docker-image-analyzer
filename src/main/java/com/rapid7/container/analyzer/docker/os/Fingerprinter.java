@@ -1,6 +1,6 @@
 package com.rapid7.container.analyzer.docker.os;
 
-import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
+import com.rapid7.docker.model.image.OperatingSystem;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
