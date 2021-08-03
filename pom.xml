@@ -50,7 +50,6 @@
   </distributionManagement>
 
   <properties>
-    <docker.image.model.version>1.0.0-CYBERTRUCK-SNAPSHOT</docker.image.model.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -69,12 +68,6 @@
   </properties>
 
   <dependencies>
-
-    <dependency>
-      <groupId>com.rapid7.docker</groupId>
-      <artifactId>docker-image-model</artifactId>
-      <version>${docker.image.model.version}</version>
-    </dependency>
 
     <!-- 3rd party dependencies -->
     <dependency>

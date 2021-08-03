@@ -19,6 +19,7 @@ public class Fingerprinter {
 
   private static final Pattern PATTERN = Pattern.compile("(?<name>.*)=(?<value>.*)");
   private static final Pattern PHOTON_RELEASE = Pattern.compile("^(?i:VMWare Photon(?:\\s?OS)?(?:/)?(?:\\s?Linux)?\\s?(?:v)?(\\d+?(?:\\.\\d+?)*?)?)$");
+  private static final Pattern CENTOS_RELEASE = Pattern.compile("^CentOS release (\\d*\\.*\\d+)?.*");
   private static final Pattern RHEL_RELEASE = Pattern.compile("^(?i:(?:Red Hat|RedHat|Red-Hat|RHEL)(?: Enterprise)?(?: Linux)?(?: Server)?(?: release)?(?: [a-z]+)?\\s?(\\d+?(?:\\.\\d+?)*?)?)(?:\\s?\\(.*\\))?$");
   private static final String OS_FAMILY = "Linux";
   private static final Map<String, String> OS_ID_TO_VENDOR = Arrays.stream(new String[][]{
@@ -52,6 +53,8 @@ public class Fingerprinter {
       return parseAlpineRelease(input, architecture);
     else if (fileName.endsWith("/photon-release"))
       return parsePhotonRelease(input, architecture);
+    else if (fileName.endsWith("/centos-release"))
+      return parseCentOSRelease(input, architecture);
     else // catch-all for rhel-like release files and anything else we missed
       return parseRhelFamilyRelease(input, architecture);
   }
@@ -142,6 +145,22 @@ public class Fingerprinter {
       }
 
       return fingerprintOperatingSystem("VMWare", product, version, architecture);
+    }
+  }
+
+  private OperatingSystem parseCentOSRelease(InputStream input, String architecture) throws IOException {
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+      String version = null;
+      String line;
+      while ((line = reader.readLine()) != null) {
+        Matcher matcher = CENTOS_RELEASE.matcher(line);
+        if (matcher.matches()) {
+          version = matcher.group(1);
+          break;
+        }
+      }
+
+      return fingerprintOperatingSystem("CentOS", OS_FAMILY, version, architecture);
     }
   }
 

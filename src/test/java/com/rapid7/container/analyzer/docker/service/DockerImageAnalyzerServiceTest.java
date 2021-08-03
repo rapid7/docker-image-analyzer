@@ -57,4 +57,27 @@ class DockerImageAnalyzerServiceTest {
     assertEquals(expectedPackages, image.getPackages().size());
     assertEquals("A set of system configuration and setup files", image.getPackages().stream().findFirst().get().getDescription());
   }
+
+  @Test
+  public void testWhatever() throws IOException {
+    // Given
+    File tarFile = new File(getClass().getClassLoader().getResource("containers/48ac30562192.tar").getFile());
+    ImageId expectedId = new ImageId("sha256:bcbdfe9aa33a028bedc671ecfe56ce628ff64a8ad1b2fa46855c03955fcdc5bf");
+    long expectedSize = 72704;
+    // omit OS check because this image tar was built from scratch
+    long expectedLayers = 3;
+    long expectedPackages = 1;
+
+    // When
+    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null);
+    Path tmpdir = Files.createTempDirectory("r7dia");
+    Image image = analyzer.analyze(tarFile, tmpdir.toString());
+
+    // Then
+    assertEquals(expectedId, image.getId());
+    assertEquals(expectedSize, image.getSize());
+    assertEquals(expectedLayers, image.getLayers().size());
+    assertEquals(expectedPackages, image.getPackages().size());
+    assertEquals("A set of system configuration and setup files", image.getPackages().stream().findFirst().get().getDescription());
+  }
 }
