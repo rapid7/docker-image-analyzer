@@ -343,6 +343,10 @@ public class DockerImageAnalyzerService {
           LOGGER.debug(format("[Image: {}] Skipping extraction of {} due to directory traversal.", tar.getName(), name).getMessage());
           continue;
         }
+        if (bigFile.isDirectory()) {
+          LOGGER.debug(format("[Image: {}] Skipping extraction of {} because it is a directory.", tar.getName(), name).getMessage());
+          continue;
+        }
 
         bigFile.getParentFile().mkdirs();
         try (FileOutputStream outputStream = new FileOutputStream(bigFile)) {

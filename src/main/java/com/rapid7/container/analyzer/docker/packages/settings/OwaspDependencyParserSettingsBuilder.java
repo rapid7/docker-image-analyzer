@@ -129,6 +129,25 @@ public class OwaspDependencyParserSettingsBuilder {
   }
 
   /**
+   * Sets the properties required for the array of {@link Analyzer} to be enabled.
+   * <p>
+   * If any analyzer is {@link Analyzer#isExperimental()}
+   * experimental analyzers must be explicitly enabled with {@link #allowExperimentalAnalyzers()} ()} prior to
+   * calling {@link #build()} for the analyzer to be enabled.
+   * </p>
+   * If any analyzer is {@link Analyzer#isRetired()}
+   * retired analyzers must be explicitly enabled with {@link #allowRetiredAnalyzers()} prior to
+   * calling {@link #build()} for the analyzer to be enabled.
+   *
+   * @param analyzers The analyzers to enable
+   * @return this
+   */
+  public OwaspDependencyParserSettingsBuilder enableAnalyzers(Set<Analyzer> analyzers) {
+    enabledAnalyzers.addAll(analyzers);
+    return this;
+  }
+
+  /**
    * Set other custom properties for tailoring the underlying dependency fingerprinting.
    *
    * @param property The property key to enable, from {@link Settings.KEYS}
