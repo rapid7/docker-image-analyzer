@@ -1,7 +1,7 @@
 package com.rapid7.container.analyzer.docker.packages;
 
-import com.rapid7.docker.model.image.OperatingSystem;
-import com.rapid7.docker.model.image.Package;
+import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
+import com.rapid7.container.analyzer.docker.model.image.Package;
 import java.io.IOException;
 import java.util.Set;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;

@@ -1,8 +1,8 @@
 package com.rapid7.container.analyzer.docker.packages;
 
-import com.rapid7.docker.model.image.OperatingSystem;
-import com.rapid7.docker.model.image.Package;
-import com.rapid7.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
+import com.rapid7.container.analyzer.docker.model.image.Package;
+import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;

@@ -1,6 +1,6 @@
 package com.rapid7.container.analyzer.docker.os;
 
-import com.rapid7.docker.model.image.OperatingSystem;
+import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +54,7 @@ public class Fingerprinter {
     else if (fileName.endsWith("/photon-release"))
       return parsePhotonRelease(input, architecture);
     else if (fileName.endsWith("/centos-release"))
-      return parseCentOSRelease(input, architecture);
+      return parseCentosRelease(input, architecture);
     else // catch-all for rhel-like release files and anything else we missed
       return parseRhelFamilyRelease(input, architecture);
   }
@@ -148,7 +148,7 @@ public class Fingerprinter {
     }
   }
 
-  private OperatingSystem parseCentOSRelease(InputStream input, String architecture) throws IOException {
+  private OperatingSystem parseCentosRelease(InputStream input, String architecture) throws IOException {
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
       String version = null;
       String line;

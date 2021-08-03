@@ -1,10 +1,10 @@
 package com.rapid7.container.analyzer.docker.fingerprinter;
 
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
+import com.rapid7.container.analyzer.docker.model.LayerPath;
+import com.rapid7.container.analyzer.docker.model.image.Image;
+import com.rapid7.container.analyzer.docker.model.json.Configuration;
 import com.rapid7.container.analyzer.docker.packages.ApkgParser;
-import com.rapid7.docker.model.LayerPath;
-import com.rapid7.docker.model.image.Image;
-import com.rapid7.docker.model.json.Configuration;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;

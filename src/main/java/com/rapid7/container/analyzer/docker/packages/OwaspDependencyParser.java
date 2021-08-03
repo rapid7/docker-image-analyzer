@@ -1,10 +1,10 @@
 package com.rapid7.container.analyzer.docker.packages;
 
 import com.rapid7.container.analyzer.docker.fingerprinter.OwaspDependencyFingerprinter;
+import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
+import com.rapid7.container.analyzer.docker.model.image.Package;
+import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
-import com.rapid7.docker.model.image.OperatingSystem;
-import com.rapid7.docker.model.image.Package;
-import com.rapid7.docker.model.image.PackageType;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
