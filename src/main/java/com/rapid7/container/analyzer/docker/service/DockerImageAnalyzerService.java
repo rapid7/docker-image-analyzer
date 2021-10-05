@@ -250,7 +250,12 @@ public class DockerImageAnalyzerService {
   }
 
   public Manifest parseManifest(File file) throws JsonParseException, JsonMappingException, IOException {
-    return objectMapper.readValue(file, Manifest.class); // TODO: polymorphic
+    // TODO: polymorphic
+    try (GZIPInputStream stream = new GZIPInputStream(new FileInputStream(file))) {
+      return objectMapper.readValue(stream, Manifest.class);
+    } catch (ZipException exception) {
+      return objectMapper.readValue(file, Manifest.class);
+    }
   }
 
   public Configuration parseConfiguration(File file) throws JsonParseException, JsonMappingException, IOException {

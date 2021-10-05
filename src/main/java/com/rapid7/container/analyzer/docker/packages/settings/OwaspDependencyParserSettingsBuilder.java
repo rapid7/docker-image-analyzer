@@ -12,6 +12,7 @@ import org.owasp.dependencycheck.analyzer.AssemblyAnalyzer;
 import org.owasp.dependencycheck.analyzer.AutoconfAnalyzer;
 import org.owasp.dependencycheck.analyzer.CMakeAnalyzer;
 import org.owasp.dependencycheck.analyzer.CocoaPodsAnalyzer;
+import org.owasp.dependencycheck.analyzer.ComposerLockAnalyzer;
 import org.owasp.dependencycheck.analyzer.Experimental;
 import org.owasp.dependencycheck.analyzer.FileNameAnalyzer;
 import org.owasp.dependencycheck.analyzer.GolangDepAnalyzer;
@@ -216,7 +217,8 @@ public class OwaspDependencyParserSettingsBuilder {
     PYTHON_PACKAGE(PythonPackageAnalyzer.class, Settings.KEYS.ANALYZER_PYTHON_PACKAGE_ENABLED),
     PIP(PipAnalyzer.class, Settings.KEYS.ANALYZER_PIP_ENABLED),
     SWIFT(SwiftPackageManagerAnalyzer.class, Settings.KEYS.ANALYZER_SWIFT_PACKAGE_MANAGER_ENABLED),
-    AUTOCONF(AutoconfAnalyzer.class, Settings.KEYS.ANALYZER_AUTOCONF_ENABLED);
+    AUTOCONF(AutoconfAnalyzer.class, Settings.KEYS.ANALYZER_AUTOCONF_ENABLED),
+    COMPOSER(ComposerLockAnalyzer.class, Settings.KEYS.ANALYZER_COMPOSER_LOCK_ENABLED);
 
     private final String name;
     private final String toggleKey;
