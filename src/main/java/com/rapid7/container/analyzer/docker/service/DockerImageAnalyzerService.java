@@ -320,7 +320,7 @@ public class DockerImageAnalyzerService {
     if (tar.length() < 100)
       return;
 
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(tar), 65536))) {
+    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
       processLayerTar(image, configuration, layer, tar, tarIn);
     } catch (ZipException ze) {
       try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
