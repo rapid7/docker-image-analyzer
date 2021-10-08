@@ -57,8 +57,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -320,11 +322,13 @@ public class DockerImageAnalyzerService {
     if (tar.length() < 100)
       return;
 
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
+    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tar), 65536)))) {
       processLayerTar(image, configuration, layer, tar, tarIn);
-    } catch (ZipException ze) {
-      try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
-        processLayerTar(image, configuration, layer, tar, tarIn);
+    } catch (IOException exception) {
+      if (exception.getMessage().equals("Input is not in the .gz format") || exception.getCause() instanceof ZipException) {
+        try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
+          processLayerTar(image, configuration, layer, tar, tarIn);
+        }
       }
     }
   }
