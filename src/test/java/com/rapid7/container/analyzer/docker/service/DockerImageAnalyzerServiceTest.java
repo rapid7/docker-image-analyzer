@@ -72,7 +72,7 @@ class DockerImageAnalyzerServiceTest {
   @Test
   public void parse() throws FileNotFoundException, IOException {
     // given
-    File tarFile = new File(getClass().getClassLoader().getResource("containers/multipackage.tar").getFile());
+    // File tarFile = new File(getClass().getClassLoader().getResource("containers/multipackage.tar").getFile());
 
     // when
     //    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null, OwaspDependencyParserSettingsBuilder.builder());
