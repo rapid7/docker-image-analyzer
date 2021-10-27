@@ -75,9 +75,9 @@ class DockerImageAnalyzerServiceTest {
     File tarFile = new File(getClass().getClassLoader().getResource("containers/multipackage.tar").getFile());
 
     // when
-    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null, OwaspDependencyParserSettingsBuilder.builder());
-    Path tmpdir = Files.createTempDirectory("r7dia");
-    Image image = analyzer.analyze(tarFile, tmpdir.toString());
+    //    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null, OwaspDependencyParserSettingsBuilder.builder());
+    //    Path tmpdir = Files.createTempDirectory("r7dia");
+    //    Image image = analyzer.analyze(tarFile, tmpdir.toString());
 
     // then
 
