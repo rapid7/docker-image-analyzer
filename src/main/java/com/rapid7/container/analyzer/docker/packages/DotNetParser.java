@@ -3,7 +3,6 @@ package com.rapid7.container.analyzer.docker.packages;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
-import com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -12,7 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import static java.util.Collections.emptySet;
 
-public class DotNetParser implements PackageParser<File>{
+public class DotNetParser implements PackageParser<File> {
 
   private static final Pattern DOT_NET_PATTERN = Pattern.compile(".*(?i)(\\.nuspec)$");
 
