@@ -3,12 +3,22 @@ package com.rapid7.container.analyzer.docker.service;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.image.ImageId;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
+import com.rapid7.container.analyzer.docker.model.image.Package;
+import com.rapid7.container.analyzer.docker.model.json.Manifest;
+import com.rapid7.container.analyzer.docker.packages.DotNetParser;
+import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class DockerImageAnalyzerServiceTest {
 
@@ -56,5 +66,20 @@ class DockerImageAnalyzerServiceTest {
     assertEquals(expectedLayers, image.getLayers().size());
     assertEquals(expectedPackages, image.getPackages().size());
     assertEquals("A set of system configuration and setup files", image.getPackages().stream().findFirst().get().getDescription());
+  }
+
+
+  @Test
+  public void parse() throws FileNotFoundException, IOException {
+    // given
+    File tarFile = new File(getClass().getClassLoader().getResource("containers/multipackage.tar").getFile());
+
+    // when
+    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null, OwaspDependencyParserSettingsBuilder.builder());
+    Path tmpdir = Files.createTempDirectory("r7dia");
+    Image image = analyzer.analyze(tarFile, tmpdir.toString());
+
+    // then
+
   }
 }

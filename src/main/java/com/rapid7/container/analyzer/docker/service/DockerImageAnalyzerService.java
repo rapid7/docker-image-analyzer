@@ -8,6 +8,7 @@ import com.rapid7.container.analyzer.docker.analyzer.ImageHandler;
 import com.rapid7.container.analyzer.docker.analyzer.LayerExtractor;
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
 import com.rapid7.container.analyzer.docker.fingerprinter.ApkgFingerprinter;
+import com.rapid7.container.analyzer.docker.fingerprinter.DotNetFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.DpkgFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.FileFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.OsReleaseFingerprinter;
@@ -31,6 +32,7 @@ import com.rapid7.container.analyzer.docker.model.json.Manifest;
 import com.rapid7.container.analyzer.docker.model.json.TarManifestJson;
 import com.rapid7.container.analyzer.docker.os.Fingerprinter;
 import com.rapid7.container.analyzer.docker.packages.ApkgParser;
+import com.rapid7.container.analyzer.docker.packages.DotNetParser;
 import com.rapid7.container.analyzer.docker.packages.DpkgParser;
 import com.rapid7.container.analyzer.docker.packages.OwaspDependencyParser;
 import com.rapid7.container.analyzer.docker.packages.PacmanPackageParser;
@@ -94,6 +96,7 @@ public class DockerImageAnalyzerService {
     layerHandlers.add(new DpkgFingerprinter(new DpkgParser()));
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
     layerHandlers.add(new PacmanFingerprinter(new PacmanPackageParser()));
+    layerHandlers.add(new DotNetFingerprinter(new DotNetParser()));
     layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(builder)));
   }
 
