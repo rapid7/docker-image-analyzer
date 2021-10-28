@@ -37,6 +37,7 @@ import com.rapid7.container.analyzer.docker.packages.DpkgParser;
 import com.rapid7.container.analyzer.docker.packages.OwaspDependencyParser;
 import com.rapid7.container.analyzer.docker.packages.PacmanPackageParser;
 import com.rapid7.container.analyzer.docker.packages.RpmPackageParser;
+import com.rapid7.container.analyzer.docker.packages.settings.CustomParserSettingsBuilder;
 import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
 import com.rapid7.container.analyzer.docker.util.InstantParser;
 import com.rapid7.container.analyzer.docker.util.InstantParserModule;
@@ -84,7 +85,15 @@ public class DockerImageAnalyzerService {
     this(rpmDockerImage, OwaspDependencyParserSettingsBuilder.EXPERIMENTAL);
   }
 
+  public DockerImageAnalyzerService(String rpmDockerImage, CustomParserSettingsBuilder customBuilder) {
+    this(rpmDockerImage, OwaspDependencyParserSettingsBuilder.EXPERIMENTAL, customBuilder);
+  }
+
   public DockerImageAnalyzerService(String rpmDockerImage, OwaspDependencyParserSettingsBuilder builder) {
+    this(rpmDockerImage, builder, CustomParserSettingsBuilder.builder());
+  }
+
+  public DockerImageAnalyzerService(String rpmDockerImage, OwaspDependencyParserSettingsBuilder owaspBuilder, CustomParserSettingsBuilder customBuilder) {
     objectMapper = new ObjectMapper();
     objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     objectMapper.registerModule(new InstantParserModule());
@@ -96,8 +105,8 @@ public class DockerImageAnalyzerService {
     layerHandlers.add(new DpkgFingerprinter(new DpkgParser()));
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
     layerHandlers.add(new PacmanFingerprinter(new PacmanPackageParser()));
-    layerHandlers.add(new DotNetFingerprinter(new DotNetParser()));
-    layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(builder)));
+    layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(owaspBuilder)));
+    layerHandlers.addAll(customBuilder.getFingerprinters());
   }
 
   public void addFileHandler(LayerFileHandler handler) {
