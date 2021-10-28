@@ -1,28 +1,25 @@
 package com.rapid7.container.analyzer.docker.packages.settings;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
 import com.rapid7.container.analyzer.docker.fingerprinter.DotNetFingerprinter;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import com.rapid7.container.analyzer.docker.packages.DotNetParser;
-import com.rapid7.container.analyzer.docker.util.Pair;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CustomParserSettingsBuilder {
 
-
-  private static final ImmutableList<Pair<PackageType, LayerFileHandler>> FINGERPRINTER_MAPPINGS = ImmutableList.of(
-      new Pair<>(PackageType.DOTNET, new DotNetFingerprinter(new DotNetParser()))
+  private static final ImmutableMap<PackageType, LayerFileHandler> FINGERPRINTER_MAPPINGS = ImmutableMap.of(
+      PackageType.DOTNET, new DotNetFingerprinter(new DotNetParser())
   );
 
   public static final CustomParserSettingsBuilder ALL = CustomParserSettingsBuilder.builder()
-      .addFingerprinters(FINGERPRINTER_MAPPINGS.stream().map(pair -> pair.getFirst()).collect(Collectors.toSet()));
+      .addFingerprinters(FINGERPRINTER_MAPPINGS.keySet());
 
   private final Set<LayerFileHandler> enabledFingerprinter = new HashSet<>();
-
 
   private CustomParserSettingsBuilder() {
   }
@@ -32,9 +29,9 @@ public class CustomParserSettingsBuilder {
   }
 
   public CustomParserSettingsBuilder addFingerprinter(PackageType packageType) {
-    for (Pair<PackageType, LayerFileHandler> pair : FINGERPRINTER_MAPPINGS) {
-      if (pair.getFirst() == packageType) {
-        enabledFingerprinter.add(pair.getSecond());
+    for (Map.Entry<PackageType, LayerFileHandler> pair : FINGERPRINTER_MAPPINGS.entrySet()) {
+      if (pair.getKey() == packageType) {
+        enabledFingerprinter.add(pair.getValue());
       }
     }
     return this;
