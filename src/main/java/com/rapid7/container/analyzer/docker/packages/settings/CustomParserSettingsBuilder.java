@@ -1,16 +1,15 @@
 package com.rapid7.container.analyzer.docker.packages.settings;
 
+import com.google.common.collect.ImmutableList;
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
 import com.rapid7.container.analyzer.docker.fingerprinter.DotNetFingerprinter;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import com.rapid7.container.analyzer.docker.packages.DotNetParser;
 import com.rapid7.container.analyzer.docker.util.Pair;
-import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static java.util.stream.Collectors.toList;
 
 public class CustomParserSettingsBuilder {
 
