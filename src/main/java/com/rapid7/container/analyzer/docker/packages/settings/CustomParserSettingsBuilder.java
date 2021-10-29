@@ -7,11 +7,11 @@ import com.rapid7.container.analyzer.docker.model.image.PackageType;
 import com.rapid7.container.analyzer.docker.packages.DotNetParser;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class CustomParserSettingsBuilder {
 
+  // Mappings for customer parsers
   private static final ImmutableMap<PackageType, LayerFileHandler> FINGERPRINTER_MAPPINGS = ImmutableMap.of(
       PackageType.DOTNET, new DotNetFingerprinter(new DotNetParser())
   );
@@ -19,7 +19,7 @@ public class CustomParserSettingsBuilder {
   public static final CustomParserSettingsBuilder ALL = CustomParserSettingsBuilder.builder()
       .addFingerprinters(FINGERPRINTER_MAPPINGS.keySet());
 
-  private final Set<LayerFileHandler> enabledFingerprinter = new HashSet<>();
+  private final Set<LayerFileHandler> enabledFingerprinters = new HashSet<>();
 
   private CustomParserSettingsBuilder() {
   }
@@ -29,10 +29,9 @@ public class CustomParserSettingsBuilder {
   }
 
   public CustomParserSettingsBuilder addFingerprinter(PackageType packageType) {
-    for (Map.Entry<PackageType, LayerFileHandler> pair : FINGERPRINTER_MAPPINGS.entrySet()) {
-      if (pair.getKey() == packageType) {
-        enabledFingerprinter.add(pair.getValue());
-      }
+    LayerFileHandler handler = FINGERPRINTER_MAPPINGS.get(packageType);
+    if (handler != null) {
+      enabledFingerprinters.add(handler);
     }
     return this;
   }
@@ -45,6 +44,6 @@ public class CustomParserSettingsBuilder {
   }
 
   public Set<LayerFileHandler> getFingerprinters() {
-    return enabledFingerprinter;
+    return enabledFingerprinters;
   }
 }
