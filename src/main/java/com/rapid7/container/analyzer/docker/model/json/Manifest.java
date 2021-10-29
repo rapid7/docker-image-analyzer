@@ -1,5 +1,6 @@
 package com.rapid7.container.analyzer.docker.model.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.rapid7.container.analyzer.docker.model.image.ImageId;
@@ -18,15 +19,15 @@ import java.util.List;
 })
 public interface Manifest {
 
-  public List<LayerId> getLayers();
+  List<LayerId> getLayers();
 
-  public default List<LayerId> getLayerBlobIds() {
+  default List<LayerId> getLayerBlobIds() {
     return getLayers();
   }
 
-  public ImageId getImageId();
+  ImageId getImageId();
 
-  public long getSize();
+  long getSize();
 
-  public String getType();
+  String getType();
 }

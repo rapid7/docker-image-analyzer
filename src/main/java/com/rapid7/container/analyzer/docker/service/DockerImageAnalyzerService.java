@@ -8,6 +8,7 @@ import com.rapid7.container.analyzer.docker.analyzer.ImageHandler;
 import com.rapid7.container.analyzer.docker.analyzer.LayerExtractor;
 import com.rapid7.container.analyzer.docker.analyzer.LayerFileHandler;
 import com.rapid7.container.analyzer.docker.fingerprinter.ApkgFingerprinter;
+import com.rapid7.container.analyzer.docker.fingerprinter.DotNetFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.DpkgFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.FileFingerprinter;
 import com.rapid7.container.analyzer.docker.fingerprinter.OsReleaseFingerprinter;
@@ -31,10 +32,12 @@ import com.rapid7.container.analyzer.docker.model.json.Manifest;
 import com.rapid7.container.analyzer.docker.model.json.TarManifestJson;
 import com.rapid7.container.analyzer.docker.os.Fingerprinter;
 import com.rapid7.container.analyzer.docker.packages.ApkgParser;
+import com.rapid7.container.analyzer.docker.packages.DotNetParser;
 import com.rapid7.container.analyzer.docker.packages.DpkgParser;
 import com.rapid7.container.analyzer.docker.packages.OwaspDependencyParser;
 import com.rapid7.container.analyzer.docker.packages.PacmanPackageParser;
 import com.rapid7.container.analyzer.docker.packages.RpmPackageParser;
+import com.rapid7.container.analyzer.docker.packages.settings.CustomParserSettingsBuilder;
 import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
 import com.rapid7.container.analyzer.docker.util.InstantParser;
 import com.rapid7.container.analyzer.docker.util.InstantParserModule;
@@ -57,8 +60,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipException;
+import java.util.zip.ZipInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -80,7 +85,15 @@ public class DockerImageAnalyzerService {
     this(rpmDockerImage, OwaspDependencyParserSettingsBuilder.EXPERIMENTAL);
   }
 
+  public DockerImageAnalyzerService(String rpmDockerImage, CustomParserSettingsBuilder customBuilder) {
+    this(rpmDockerImage, OwaspDependencyParserSettingsBuilder.EXPERIMENTAL, customBuilder);
+  }
+
   public DockerImageAnalyzerService(String rpmDockerImage, OwaspDependencyParserSettingsBuilder builder) {
+    this(rpmDockerImage, builder, CustomParserSettingsBuilder.builder());
+  }
+
+  public DockerImageAnalyzerService(String rpmDockerImage, OwaspDependencyParserSettingsBuilder owaspBuilder, CustomParserSettingsBuilder customBuilder) {
     objectMapper = new ObjectMapper();
     objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     objectMapper.registerModule(new InstantParserModule());
@@ -92,7 +105,8 @@ public class DockerImageAnalyzerService {
     layerHandlers.add(new DpkgFingerprinter(new DpkgParser()));
     layerHandlers.add(new ApkgFingerprinter(new ApkgParser()));
     layerHandlers.add(new PacmanFingerprinter(new PacmanPackageParser()));
-    layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(builder)));
+    layerHandlers.add(new OwaspDependencyFingerprinter(new OwaspDependencyParser(owaspBuilder)));
+    layerHandlers.addAll(customBuilder.getFingerprinters());
   }
 
   public void addFileHandler(LayerFileHandler handler) {
@@ -250,7 +264,12 @@ public class DockerImageAnalyzerService {
   }
 
   public Manifest parseManifest(File file) throws JsonParseException, JsonMappingException, IOException {
-    return objectMapper.readValue(file, Manifest.class); // TODO: polymorphic
+    // TODO: polymorphic
+    try (GZIPInputStream stream = new GZIPInputStream(new FileInputStream(file))) {
+      return objectMapper.readValue(stream, Manifest.class);
+    } catch (ZipException exception) {
+      return objectMapper.readValue(file, Manifest.class);
+    }
   }
 
   public Configuration parseConfiguration(File file) throws JsonParseException, JsonMappingException, IOException {
@@ -315,11 +334,13 @@ public class DockerImageAnalyzerService {
     if (tar.length() < 100)
       return;
 
-    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new GZIPInputStream(new FileInputStream(tar), 65536))) {
+    try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tar), 65536)))) {
       processLayerTar(image, configuration, layer, tar, tarIn);
-    } catch (ZipException ze) {
-      try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
-        processLayerTar(image, configuration, layer, tar, tarIn);
+    } catch (IOException exception) {
+      if (exception.getMessage().equals("Input is not in the .gz format") || exception.getCause() instanceof ZipException) {
+        try (TarArchiveInputStream tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tar), 65536))) {
+          processLayerTar(image, configuration, layer, tar, tarIn);
+        }
       }
     }
   }

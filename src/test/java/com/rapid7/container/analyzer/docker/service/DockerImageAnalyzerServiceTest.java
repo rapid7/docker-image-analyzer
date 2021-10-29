@@ -2,12 +2,23 @@ package com.rapid7.container.analyzer.docker.service;
 
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.image.ImageId;
+import com.rapid7.container.analyzer.docker.model.image.Layer;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
+import com.rapid7.container.analyzer.docker.model.image.Package;
+import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.packages.settings.CustomParserSettingsBuilder;
+import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DockerImageAnalyzerServiceTest {
@@ -56,5 +67,29 @@ class DockerImageAnalyzerServiceTest {
     assertEquals(expectedLayers, image.getLayers().size());
     assertEquals(expectedPackages, image.getPackages().size());
     assertEquals("A set of system configuration and setup files", image.getPackages().stream().findFirst().get().getDescription());
+  }
+
+
+  @Test
+  public void parseDotnet() throws FileNotFoundException, IOException {
+    // given
+    File tarFile = new File(getClass().getClassLoader().getResource("containers/dotnet-packages.tar").getFile());
+
+    // when
+    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null, OwaspDependencyParserSettingsBuilder.builder(),
+        CustomParserSettingsBuilder.builder().addFingerprinter(PackageType.DOTNET));
+    Path tmpdir = Files.createTempDirectory("r7dia");
+    Image image = analyzer.analyze(tarFile, tmpdir.toString());
+
+    // then
+    List<Layer> layersWithDotnetPackages = image.getLayers().stream()
+        .filter(layer -> layer.getPackages().stream().anyMatch(pkg -> pkg.getType() == PackageType.DOTNET))
+        .collect(Collectors.toList());
+    Set<Package> dotnetPackages = image.getPackages().stream()
+        .filter(pkg -> pkg.getType() == PackageType.DOTNET)
+        .collect(Collectors.toSet());
+
+    assertThat(layersWithDotnetPackages.size(), is(1));
+    assertThat(dotnetPackages.size(), is(5));
   }
 }
