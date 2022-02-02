@@ -3,6 +3,7 @@ package com.rapid7.container.analyzer.docker.model.image.json.mixin;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rapid7.container.analyzer.docker.model.Digest;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.image.ImageId;
 import com.rapid7.container.analyzer.docker.model.image.ImageType;
@@ -29,6 +30,10 @@ public abstract class ImageMixin extends Image {
   @Override
   @JsonProperty("id")
   public abstract ImageId getId();
+
+  @Override
+  @JsonProperty("digest")
+  public abstract Digest getDigest();
 
   @Override
   @JsonProperty("type")
