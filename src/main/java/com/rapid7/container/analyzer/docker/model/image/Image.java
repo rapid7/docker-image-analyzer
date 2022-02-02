@@ -3,7 +3,6 @@ package com.rapid7.container.analyzer.docker.model.image;
 import com.rapid7.container.analyzer.docker.model.Digest;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -14,7 +13,6 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -23,14 +21,13 @@ public class Image {
 
   private static final Set<String> OS_PACKAGES = Stream.of("APK", "APKG", "DPKG", "PACMAN", "RPM").collect(Collectors.toSet());
   protected ImageId id;
-  protected Set<Digest> digests;
+  protected Digest digest;
   protected ImageType type;
   protected Instant created;
   protected Long size;
   protected LinkedHashMap<LayerId, Layer> layers;
 
   private Image() {
-    digests = new HashSet<>();
     layers = new LinkedHashMap<>();
   }
 
@@ -42,7 +39,7 @@ public class Image {
 
   public Image(ImageId id, ImageType type, Digest digest) {
     this(id, type);
-    digests.add(digest);
+    this.digest = digest;
   }
 
   public Image(ImageId id, ImageType type, Long size, Instant created) {
@@ -53,12 +50,7 @@ public class Image {
 
   public Image(ImageId id, ImageType type, Digest digest, Long size, Instant created) {
     this(id, type, size, created);
-    addDigest(digest);
-  }
-
-  public Image(ImageId id, ImageType type, Iterable<? extends Digest> digests, Long size, Instant created) {
-    this(id, type, size, created);
-    addDigests(digests);
+    this.digest = digest;
   }
 
   public Image addLayer(Layer layer) {
@@ -107,23 +99,12 @@ public class Image {
     return type;
   }
 
-  public Image addDigest(Digest digest) {
-    if (digest != null)
-      digests.add(digest);
-
-    return this;
+  public void setDigest(Digest digest) {
+    this.digest = digest;
   }
 
-  public Image addDigests(Iterable<? extends Digest> digests) {
-    if (digests != null)
-      for (Digest digest : digests)
-        addDigest(digest);
-
-    return this;
-  }
-
-  public Set<Digest> getDigests() {
-    return unmodifiableSet(digests);
+  public Digest getDigest() {
+    return digest;
   }
 
   public Image setCreated(Instant created) {
@@ -186,7 +167,7 @@ public class Image {
   public String toString() {
     return new StringJoiner(", ", Image.class.getSimpleName() + "[", "]")
         .add("Id=" + id)
-        .add("Digests=" + digests)
+        .add("Digest=" + digest)
         .add("Type=" + type)
         .add("Created=" + created)
         .add("Size=" + size)
