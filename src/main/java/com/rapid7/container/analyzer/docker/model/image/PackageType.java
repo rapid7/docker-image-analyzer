@@ -27,7 +27,7 @@ public enum PackageType {
   RUST("RUST"),
   COLDFUSION("COLDFUSION"),
   PERL("PERL"),
-  ELIXIR("EXLIXIR"),
+  ELIXIR("ELIXIR"),
   UNKNOWN("UNKNOWN");
 
   private final String name;
