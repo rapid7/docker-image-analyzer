@@ -5,7 +5,6 @@ import com.rapid7.container.analyzer.docker.model.LayerPath;
 import com.rapid7.container.analyzer.docker.model.image.Image;
 import com.rapid7.container.analyzer.docker.model.json.Configuration;
 import com.rapid7.container.analyzer.docker.packages.M2RepositoryParser;
-import com.rapid7.container.analyzer.docker.packages.OwaspDependencyParser;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +15,7 @@ public class JavaM2RepositoryFingerprinter implements LayerFileHandler {
 
   private final M2RepositoryParser m2RepositoryParser;
 
-  public JavaM2RepositoryFingerprinter(M2RepositoryParser m2RepositoryParser){
+  public JavaM2RepositoryFingerprinter(M2RepositoryParser m2RepositoryParser) {
     this.m2RepositoryParser = m2RepositoryParser;
   }
 
