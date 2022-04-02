@@ -92,4 +92,19 @@ class DockerImageAnalyzerServiceTest {
     assertThat(layersWithDotnetPackages.size(), is(1));
     assertThat(dotnetPackages.size(), is(5));
   }
+
+//  @Test
+//  public void parseSpring4Shell() throws FileNotFoundException, IOException {
+//    // given
+//    File tarFile = new File(getClass().getClassLoader().getResource("containers/spring4shell.tar").getFile());
+//
+//    // when
+//    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null);
+//    Path tmpdir = Files.createTempDirectory("r7dia");
+//    Image image = analyzer.analyze(tarFile, tmpdir.toString());
+//
+//    // then
+//    Set<Package> packages = image.getPackages();
+//    assertThat("org.springframework:spring-beans", isIn(packages.stream().map(Package::getPackage).collect(toList())));
+//  }
 }
