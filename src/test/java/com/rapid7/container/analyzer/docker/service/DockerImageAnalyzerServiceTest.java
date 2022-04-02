@@ -17,8 +17,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
+import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isIn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DockerImageAnalyzerServiceTest {
@@ -93,18 +96,25 @@ class DockerImageAnalyzerServiceTest {
     assertThat(dotnetPackages.size(), is(5));
   }
 
-//  @Test
-//  public void parseSpring4Shell() throws FileNotFoundException, IOException {
-//    // given
-//    File tarFile = new File(getClass().getClassLoader().getResource("containers/spring4shell.tar").getFile());
-//
-//    // when
-//    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null);
-//    Path tmpdir = Files.createTempDirectory("r7dia");
-//    Image image = analyzer.analyze(tarFile, tmpdir.toString());
-//
-//    // then
-//    Set<Package> packages = image.getPackages();
-//    assertThat("org.springframework:spring-beans", isIn(packages.stream().map(Package::getPackage).collect(toList())));
-//  }
+  @Test
+  public void parseSpring4Shell() throws FileNotFoundException, IOException {
+    // given
+    File tarFile = new File(getClass().getClassLoader().getResource("containers/jar-image.tar").getFile());
+
+    // when
+    DockerImageAnalyzerService analyzer = new DockerImageAnalyzerService(null);
+    Path tmpdir = Files.createTempDirectory("r7dia");
+    Image image = analyzer.analyze(tarFile, tmpdir.toString());
+
+    // then
+    Set<Package> packages = image.getPackages();
+    Set<String> names = packages.stream().map(Package::getPackage).collect(toSet());
+    Set<String> versions = packages.stream().map(Package::getVersion).collect(toSet());
+    assertThat(names.size(), is(1));
+    assertThat("org.springframework:spring-beans", isIn(names));
+    assertThat(versions, containsInAnyOrder("5.0.8.RELEASE", "5.1.10.RELEASE", "5.2.12.RELEASE", "5.2.9.RELEASE", "5.2.18.RELEASE", "5.1.19.RELEASE", "5.3.16", "5.0.5.RELEASE",
+        "5.3.7", "5.3.13", "5.2.3.RELEASE", "5.1.8.RELEASE", "5.1.18.RELEASE", "5.3.17", "5.3.14", "5.3.18", "5.3.6", "5.0.1.RELEASE", "5.1.9.RELEASE", "5.0.14.RELEASE", "5.3.15",
+        "5.0.11.RELEASE", "5.1.3.RELEASE", "5.2.19.RELEASE"));
+
+  }
 }
