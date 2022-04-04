@@ -58,9 +58,14 @@ public class OwaspDependencyParser implements PackageParser<File> {
   }
 
   private Package convertDependencyToPackage(Dependency dependency) {
+
+    if (dependency.getName() == null && "Java".equalsIgnoreCase(dependency.getEcosystem())) {
+      dependency = Spring4ShellParser.getPackageNameandVersion(dependency);
+    }
     if (dependency.getName() == null || dependency.getVersion() == null || dependency.getEcosystem() == null) {
       return null;
     }
+
     return new Package(dependency.getFileName(),
         PackageType.fromString(dependency.getEcosystem()),
         null,
