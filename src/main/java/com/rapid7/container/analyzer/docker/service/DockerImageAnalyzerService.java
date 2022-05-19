@@ -175,12 +175,24 @@ public class DockerImageAnalyzerService {
     try {
       // parse the image configuration
       List<HistoryJson> layerHistories = configuration.getHistory();
+      if (layerHistories == null) {
+        LOGGER.error("Layer histories either do not exist or there was an error parsing them. Image with id {} has been SKIPPED.", id.getId());
+        return null;
+      }
 
       // the ordered identifiers of non-empty layers (which are presumed to have file-system changes requiring a blob)
       List<LayerId> layers = manifest.getLayers();
+      if (layers == null) {
+        LOGGER.error("There was an error parsing layers. Image with id " + id.getId() + " has been SKIPPED.");
+        return null;
+      }
 
       // the ordered identifiers of the blobs to retrieve for each non-empty layer
       List<LayerId> layerBlobIds = manifest.getLayerBlobIds();
+      if (layerBlobIds == null) {
+        LOGGER.error("There was an error parsing layer blog ids. Image with id " + id.getId() + " has been SKIPPED.");
+        return null;
+      }
 
       // TODO: not pulling out the repository in the digest reference
       Image image = new Image(id, ImageType.DOCKER, digest, manifest.getSize(), configuration.getCreated());
