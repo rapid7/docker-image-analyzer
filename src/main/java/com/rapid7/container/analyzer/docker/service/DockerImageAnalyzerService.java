@@ -176,7 +176,7 @@ public class DockerImageAnalyzerService {
       // parse the image configuration
       List<HistoryJson> layerHistories = configuration.getHistory();
       if (layerHistories == null) {
-        LOGGER.error("Layer histories either do not exist or there was an error parsing them. Image with id " + id.getId() + " has been SKIPPED.");
+        LOGGER.error("Layer histories either do not exist or there was an error parsing them. Image with id {} has been SKIPPED.", id.getId());
         return null;
       }
 
