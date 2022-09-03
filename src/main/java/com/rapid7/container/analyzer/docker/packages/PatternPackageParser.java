@@ -17,9 +17,9 @@ import java.util.stream.Stream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static jdk.internal.joptsimple.internal.Strings.isNullOrEmpty;
 
 public abstract class PatternPackageParser implements PackageParser<InputStream> {
 
@@ -49,7 +49,7 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
 
     LOGGER.info("Parsing packages using {} with operating system {}.", getClass().getSimpleName(), operatingSystem);
     if (!doesOperatingSystemHaveAllNecessaryFields(operatingSystem)) {
-      LOGGER.error("Parsing os packages using {} but operating system does not have all the necessary fields: {}", getClass().getSimpleName(), operatingSystem.toString());
+      LOGGER.error("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
     }
 
     Set<Package> packages = new HashSet<>();
