@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 
@@ -36,9 +37,20 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
 
   public abstract boolean supports(String name, TarArchiveEntry entry);
 
+  private static boolean doesOperatingSystemHaveAllNecessaryFields(OperatingSystem os) {
+    if (os == null || isNullOrEmpty(os.getName()) || isNullOrEmpty(os.getFamily()) ||  isNullOrEmpty(os.getVendor()) || isNullOrEmpty(os.getVersion())) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   public Set<Package> parse(InputStream input, OperatingSystem operatingSystem) throws FileNotFoundException, IOException {
 
     LOGGER.info("Parsing packages using {} with operating system {}.", getClass().getSimpleName(), operatingSystem);
+    if (!doesOperatingSystemHaveAllNecessaryFields(operatingSystem)) {
+      LOGGER.error("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
+    }
 
     Set<Package> packages = new HashSet<>();
     try (BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
