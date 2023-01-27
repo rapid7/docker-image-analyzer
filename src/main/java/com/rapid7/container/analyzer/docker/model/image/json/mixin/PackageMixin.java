@@ -10,6 +10,7 @@ import com.rapid7.container.analyzer.docker.model.image.IdentifiablePackage;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 
 @JsonTypeName("package")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "_type")
@@ -36,7 +37,7 @@ public abstract class PackageMixin extends Package {
       @JsonProperty("homePage") String homepage,
       @JsonProperty("license") String license,
       @JsonProperty("epoch") String epoch,
-      @JsonProperty("release") String release) {
+      @JsonProperty("release") String release) throws PackageValidationException {
     super(source, type, osVendor, osFamily, osName, osVersion, osArchitecture, name, version, description, size, maintainer, homepage, license, epoch, release);
   }
 

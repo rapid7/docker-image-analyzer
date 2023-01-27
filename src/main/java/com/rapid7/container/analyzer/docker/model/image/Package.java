@@ -33,28 +33,44 @@ public class Package implements Comparable<Package> {
    */
   private String release;
 
-  public Package(String source, PackageType type, OperatingSystem os, String name, String version, String description, Long size, String maintainer, String homepage, String license) {
+  public Package(String source, PackageType type, OperatingSystem os, String name, String version, String description, Long size, String maintainer, String homepage,
+      String license) throws PackageValidationException {
     this(source, type, os == null ? null : os.getVendor(), os == null ? null : os.getFamily(), os == null ? null : os.getName(), os == null ? null : os.getVersion(), os == null ? null : os.getArchitecture(), name, version, description, size, maintainer, homepage, license, null, null);
   }
 
-  public Package(String source, PackageType type, OperatingSystem os, String name, String version, String description, Long size, String maintainer, String homepage, String license, String epoch, String release) {
+  public Package(String source, PackageType type, OperatingSystem os, String name, String version, String description, Long size, String maintainer, String homepage,
+      String license, String epoch, String release) throws PackageValidationException {
     this(source, type, os == null ? null : os.getVendor(), os == null ? null : os.getFamily(), os == null ? null : os.getName(), os == null ? null : os.getVersion(), os == null ? null : os.getArchitecture(), name, version, description, size, maintainer, homepage, license, epoch, release);
   }
 
-  public Package(String source, PackageType type, String osVendor, String osFamily, String osName, String osVersion, String osArchitecture, String name, String version, String description, Long size, String maintainer, String homepage, String license) {
+  public Package(String source, PackageType type, String osVendor, String osFamily, String osName, String osVersion, String osArchitecture, String name, String version,
+      String description, Long size, String maintainer, String homepage, String license) throws PackageValidationException {
     this(source, type, osVendor, osFamily, osName, osVersion, osArchitecture, name, version, description, size, maintainer, homepage, license, null, null);
   }
 
-  public Package(String source, PackageType type, String osVendor, String osFamily, String osName, String osVersion, String osArchitecture, String name, String version, String description, Long size, String maintainer, String homepage, String license, String epoch, String release) {
-    this.type = requireNonNull(type, "type");
+  public Package(String source, PackageType type, String osVendor, String osFamily, String osName, String osVersion, String osArchitecture, String name, String version,
+      String description, Long size, String maintainer, String homepage, String license, String epoch, String release) throws PackageValidationException {
+    if (type == null) {
+      throw new PackageValidationException("Invalid input when attempting to create a package. Packages require a type and no type was provided.");
+    } else {
+      this.type = requireNonNull(type, "type");
+    }
     this.source = source;
     this.osVendor = osVendor;
     this.osFamily = osFamily;
     this.osVersion = osVersion;
     this.osArchitecture = osArchitecture;
     this.osName = osName;
-    this.name = requireNonNull(name, "name");
-    this.version = requireNonNull(version, "version");
+    if (name == null) {
+      throw new PackageValidationException("Invalid input when attempting to create a package. Packages require a name and no name was provided.");
+    } else {
+      this.name = requireNonNull(name, "name");
+    }
+    if (version == null) {
+      throw new PackageValidationException("Invalid input when attempting to create a package. Packages require a version and no version was provided.");
+    } else {
+      this.version = requireNonNull(version, "version");
+    }
     this.description = description;
     this.maintainer = maintainer;
     this.homepage = homepage;

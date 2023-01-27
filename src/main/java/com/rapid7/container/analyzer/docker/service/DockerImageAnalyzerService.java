@@ -70,6 +70,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.slf4j.helpers.MessageFormatter.arrayFormat;
 import static org.slf4j.helpers.MessageFormatter.format;
@@ -361,6 +362,10 @@ public class DockerImageAnalyzerService {
   }
 
   private void processLayerTar(Image image, Configuration configuration, Layer layer, File tar, TarArchiveInputStream tarIn) throws IOException {
+    if (image != null && image.getId() != null && layer != null && layer.getId() != null) {
+      MDC.put("image_id", image.getId().getId());
+      MDC.put("layer_id", layer.getId().getId());
+    }
     TarArchiveEntry entry = null;
     while ((entry = tarIn.getNextTarEntry()) != null) {
       String name = entry.getName();

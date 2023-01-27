@@ -4,6 +4,7 @@ import com.rapid7.container.analyzer.docker.fingerprinter.OwaspDependencyFingerp
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 import com.rapid7.container.analyzer.docker.packages.settings.OwaspDependencyParserSettingsBuilder;
 import java.io.File;
 import java.util.Arrays;
@@ -66,16 +67,22 @@ public class OwaspDependencyParser implements PackageParser<File> {
       return null;
     }
 
-    return new Package(dependency.getFileName(),
-        PackageType.fromString(dependency.getEcosystem()),
-        null,
-        dependency.getName(),
-        fixVersion(dependency.getVersion()),
-        dependency.getDescription(),
-        0L,
-        null,
-        null,
-        dependency.getLicense());
+    try {
+      return new Package(
+          dependency.getFileName(),
+          PackageType.fromString(dependency.getEcosystem()),
+          null,
+          dependency.getName(),
+          fixVersion(dependency.getVersion()),
+          dependency.getDescription(),
+          0L,
+          null,
+          null,
+          dependency.getLicense());
+    } catch (PackageValidationException pve) {
+      LOGGER.warn(pve.getMessage());
+      return null;
+    }
   }
 
   // Fixing versions like \"0.0.1-security\" to 0.0.1-security

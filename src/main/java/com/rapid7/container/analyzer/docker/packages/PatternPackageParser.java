@@ -3,6 +3,7 @@ package com.rapid7.container.analyzer.docker.packages;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -74,8 +75,13 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
 
           if (name.equals(keys.getPackageKey())) {
             if (pkg != null) {
-              if (!isBlacklisted(status))
-                packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+              if (!isBlacklisted(status)) {
+                try {
+                  packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+                } catch (PackageValidationException pve) {
+                  LOGGER.warn(pve.getMessage());
+                }
+              }
               pkg = null;
               source = null;
               version = null;
@@ -116,8 +122,13 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
       }
 
       if (pkg != null) {
-        if (!isBlacklisted(status))
-          packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+        if (!isBlacklisted(status)) {
+          try {
+            packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+          } catch (PackageValidationException pve) {
+            LOGGER.warn(pve.getMessage());
+          }
+        }
 
         pkg = null;
         source = null;

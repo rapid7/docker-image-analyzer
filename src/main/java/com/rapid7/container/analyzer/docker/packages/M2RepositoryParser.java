@@ -3,12 +3,15 @@ package com.rapid7.container.analyzer.docker.packages;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Collections.emptySet;
@@ -20,6 +23,7 @@ public class M2RepositoryParser implements PackageParser<File> {
   private static final Pattern M2_REPOSITORY_PATTERN = Pattern.compile(".*(?i)(\\.(m2/repository)).*(.jar|.pom)$");
   private static final String GROUP_ID_DELIMITER = ".";
   private static final String PACKAGE_NAME_FORMAT = "%s:%s";
+  private static final Logger LOGGER = LoggerFactory.getLogger(M2RepositoryParser.class);
 
   @Override
   public boolean supports(String name, TarArchiveEntry entry) {
@@ -38,17 +42,13 @@ public class M2RepositoryParser implements PackageParser<File> {
     String artifactId = pathParts[pathParts.length - 3];
     String groupId = extractGroupId(pathParts);
 
-    return singleton(new Package(
-        fileName,
-        PackageType.JAVA,
-        null,
-        format(PACKAGE_NAME_FORMAT, groupId, artifactId),
-        versionNumber,
-        null,
-        0L,
-        null,
-        null,
-        null));
+    try {
+      return singleton(new Package(fileName, PackageType.JAVA, null, format(PACKAGE_NAME_FORMAT, groupId, artifactId), versionNumber, null, 0L, null,
+          null, null));
+    } catch (PackageValidationException pve) {
+      LOGGER.warn(pve.getMessage());
+      return null;
+    }
   }
 
   private String extractGroupId(String[] pathParts) {

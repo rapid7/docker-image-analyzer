@@ -3,6 +3,7 @@ package com.rapid7.container.analyzer.docker.packages;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -13,10 +14,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PacmanPackageParser implements PackageParser<InputStream> {
 
   private static final Pattern PACMAN_DESC_PATTERN = Pattern.compile(".*/lib/pacman/local/(?<name>.*)/desc");
+  private static final Logger LOGGER = LoggerFactory.getLogger(PacmanPackageParser.class);
 
   @Override
   public boolean supports(String name, TarArchiveEntry entry) {
@@ -43,8 +47,13 @@ public class PacmanPackageParser implements PackageParser<InputStream> {
         else if (line != null && !line.isEmpty()) {
           switch (token) {
             case "%NAME%":
-              if (pkg != null)
-                packages.add(new Package(source, PackageType.PACMAN, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license));
+              if (pkg != null) {
+                try {
+                  packages.add(new Package(source, PackageType.PACMAN, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license));
+                } catch (PackageValidationException pve) {
+                  LOGGER.warn(pve.getMessage());
+                }
+              }
 
               pkg = line;
               break;
@@ -72,8 +81,13 @@ public class PacmanPackageParser implements PackageParser<InputStream> {
         }
       }
 
-      if (pkg != null)
-        packages.add(new Package(source, PackageType.PACMAN, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license));
+      if (pkg != null) {
+        try {
+          packages.add(new Package(source, PackageType.PACMAN, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license));
+        } catch (PackageValidationException pve) {
+          LOGGER.warn(pve.getMessage());
+        }
+      }
     }
 
     return packages;
