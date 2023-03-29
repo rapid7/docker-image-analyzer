@@ -85,7 +85,7 @@ public class DpkgParserTest {
   }
 
   @Test
-  public void partialOSParse() throws FileNotFoundException, IOException {
+  public void packageMissingVersionParse() throws FileNotFoundException, IOException {
     // given
     DpkgParser parser = new DpkgParser();
 
