@@ -39,6 +39,9 @@ public class OsReleaseFingerprinter implements LayerFileHandler {
 
   // maps values to what content expects
   private String convert(String architecture) {
+    if (architecture == null) {
+      return "(none)";
+    }
     switch (architecture) {
       case "amd64":
         return "x86_64";
