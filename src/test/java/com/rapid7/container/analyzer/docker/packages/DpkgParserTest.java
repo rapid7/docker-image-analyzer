@@ -74,4 +74,22 @@ public class DpkgParserTest {
     assertThat(packages.size(), is(equalTo(83)));
     assertThat(packages, hasItem(samePropertyValuesAs(PACKAGE)));
   }
+
+  @Test
+  public void nullOSParse() throws FileNotFoundException, IOException {
+    // given
+    DpkgParser parser = new DpkgParser();
+
+    // when
+    Set<Package> packages = parser.parse(DpkgParserTest.class.getResourceAsStream("dpkg.info"), null);
+  }
+
+  @Test
+  public void partialOSParse() throws FileNotFoundException, IOException {
+    // given
+    DpkgParser parser = new DpkgParser();
+
+    // when
+    Set<Package> packages = parser.parse(DpkgParserTest.class.getResourceAsStream("dpkg-with-null-version.info"), OS);
+  }
 }

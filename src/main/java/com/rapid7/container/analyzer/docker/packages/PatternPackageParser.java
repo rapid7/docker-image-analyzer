@@ -48,9 +48,9 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
 
   public Set<Package> parse(InputStream input, OperatingSystem operatingSystem) throws FileNotFoundException, IOException {
 
-    LOGGER.info("Parsing packages using {} with operating system {}.", getClass().getSimpleName(), operatingSystem);
+    LOGGER.debug("Parsing packages using {} with operating system {}.", getClass().getSimpleName(), operatingSystem);
     if (!doesOperatingSystemHaveAllNecessaryFields(operatingSystem)) {
-      LOGGER.error("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
+      LOGGER.warn("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
     }
 
     Set<Package> packages = new HashSet<>();
