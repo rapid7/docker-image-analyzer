@@ -3,6 +3,7 @@ package com.rapid7.container.analyzer.docker.packages;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -51,7 +52,11 @@ public class DotNetParser implements PackageParser<File> {
           String name = getValueForAttribute(element, "id");
           String version = getValueForAttribute(element, "version");
           String description = getValueForAttribute(element, "description");
-          packages.add(new Package(source, PackageType.DOTNET, operatingSystem, name, version, description, null, null, null, null));
+          try {
+            packages.add(new Package(source, PackageType.DOTNET, operatingSystem, name, version, description, null, null, null, null));
+          } catch (PackageValidationException pve) {
+            LOGGER.info(pve.getMessage());
+          }
         }
       }
     } catch (ParserConfigurationException | SAXException exception) {

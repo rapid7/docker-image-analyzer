@@ -3,6 +3,7 @@ package com.rapid7.container.analyzer.docker.packages;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -47,9 +48,9 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
 
   public Set<Package> parse(InputStream input, OperatingSystem operatingSystem) throws FileNotFoundException, IOException {
 
-    LOGGER.info("Parsing packages using {} with operating system {}.", getClass().getSimpleName(), operatingSystem);
+    LOGGER.debug("Parsing packages using {} with operating system {}.", getClass().getSimpleName(), operatingSystem);
     if (!doesOperatingSystemHaveAllNecessaryFields(operatingSystem)) {
-      LOGGER.error("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
+      LOGGER.info("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
     }
 
     Set<Package> packages = new HashSet<>();
@@ -74,8 +75,13 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
 
           if (name.equals(keys.getPackageKey())) {
             if (pkg != null) {
-              if (!isBlacklisted(status))
-                packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+              if (!isBlacklisted(status)) {
+                try {
+                  packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+                } catch (PackageValidationException pve) {
+                  LOGGER.info(pve.getMessage());
+                }
+              }
               pkg = null;
               source = null;
               version = null;
@@ -116,8 +122,13 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
       }
 
       if (pkg != null) {
-        if (!isBlacklisted(status))
-          packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+        if (!isBlacklisted(status)) {
+          try {
+            packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
+          } catch (PackageValidationException pve) {
+            LOGGER.info(pve.getMessage());
+          }
+        }
 
         pkg = null;
         source = null;

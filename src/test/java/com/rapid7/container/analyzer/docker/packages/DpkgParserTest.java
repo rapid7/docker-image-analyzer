@@ -3,6 +3,7 @@ package com.rapid7.container.analyzer.docker.packages;
 import com.rapid7.container.analyzer.docker.model.image.OperatingSystem;
 import com.rapid7.container.analyzer.docker.model.image.Package;
 import com.rapid7.container.analyzer.docker.model.image.PackageType;
+import com.rapid7.container.analyzer.docker.model.image.PackageValidationException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
@@ -16,7 +17,26 @@ import static org.hamcrest.Matchers.samePropertyValuesAs;
 public class DpkgParserTest {
 
   private static final OperatingSystem OS = new OperatingSystem("Debian", "Linux", "Linux", "x86_64", "9", "Debian Linux 9");
-  private static final Package PACKAGE = new Package(null, PackageType.DPKG, OS, "dash", "0.5.8-2.4", "POSIX-compliant shell", 204000L, "Gerrit Pape <pape@smarden.org>", "http://gondor.apana.org.au/~herbert/dash/", null);
+  private static final Package PACKAGE;
+
+  static {
+    Package PACKAGE1;
+    try {
+      PACKAGE1 = new Package(null,
+          PackageType.DPKG,
+          OS,
+          "dash",
+          "0.5.8-2.4",
+          "POSIX-compliant shell",
+          204000L,
+          "Gerrit Pape <pape@smarden.org>",
+          "http://gondor.apana.org.au/~herbert/dash/",
+          null);
+    } catch (PackageValidationException pve) {
+      PACKAGE1 = null;
+    }
+    PACKAGE = PACKAGE1;
+  }
 
   @Test
   public void singleParse() throws FileNotFoundException, IOException {
@@ -53,5 +73,23 @@ public class DpkgParserTest {
     // then
     assertThat(packages.size(), is(equalTo(83)));
     assertThat(packages, hasItem(samePropertyValuesAs(PACKAGE)));
+  }
+
+  @Test
+  public void nullOSParse() throws FileNotFoundException, IOException {
+    // given
+    DpkgParser parser = new DpkgParser();
+
+    // when
+    Set<Package> packages = parser.parse(DpkgParserTest.class.getResourceAsStream("dpkg.info"), null);
+  }
+
+  @Test
+  public void packageMissingVersionParse() throws FileNotFoundException, IOException {
+    // given
+    DpkgParser parser = new DpkgParser();
+
+    // when
+    Set<Package> packages = parser.parse(DpkgParserTest.class.getResourceAsStream("dpkg-with-null-version.info"), OS);
   }
 }
