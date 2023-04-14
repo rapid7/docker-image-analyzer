@@ -80,7 +80,7 @@ public class OwaspDependencyParser implements PackageParser<File> {
           null,
           dependency.getLicense());
     } catch (PackageValidationException pve) {
-      LOGGER.warn(pve.getMessage());
+      LOGGER.info(pve.getMessage());
       return null;
     }
   }

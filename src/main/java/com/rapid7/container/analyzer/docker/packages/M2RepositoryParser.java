@@ -46,7 +46,7 @@ public class M2RepositoryParser implements PackageParser<File> {
       return singleton(new Package(fileName, PackageType.JAVA, null, format(PACKAGE_NAME_FORMAT, groupId, artifactId), versionNumber, null, 0L, null,
           null, null));
     } catch (PackageValidationException pve) {
-      LOGGER.warn(pve.getMessage());
+      LOGGER.info(pve.getMessage());
       return null;
     }
   }

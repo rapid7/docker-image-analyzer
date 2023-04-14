@@ -51,7 +51,7 @@ public class PacmanPackageParser implements PackageParser<InputStream> {
                 try {
                   packages.add(new Package(source, PackageType.PACMAN, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license));
                 } catch (PackageValidationException pve) {
-                  LOGGER.warn(pve.getMessage());
+                  LOGGER.info(pve.getMessage());
                 }
               }
 

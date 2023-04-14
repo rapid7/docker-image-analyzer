@@ -50,7 +50,7 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
 
     LOGGER.debug("Parsing packages using {} with operating system {}.", getClass().getSimpleName(), operatingSystem);
     if (!doesOperatingSystemHaveAllNecessaryFields(operatingSystem)) {
-      LOGGER.warn("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
+      LOGGER.info("Parsing os packages using {} but operating system does not have all the necessary fields. OS is {}.", getClass().getSimpleName(), operatingSystem);
     }
 
     Set<Package> packages = new HashSet<>();
@@ -79,7 +79,7 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
                 try {
                   packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
                 } catch (PackageValidationException pve) {
-                  LOGGER.warn(pve.getMessage());
+                  LOGGER.info(pve.getMessage());
                 }
               }
               pkg = null;
@@ -126,7 +126,7 @@ public abstract class PatternPackageParser implements PackageParser<InputStream>
           try {
             packages.add(new Package(source, type, operatingSystem, pkg, version, description, installedSize, maintainer, homepage, license, epoch, release));
           } catch (PackageValidationException pve) {
-            LOGGER.warn(pve.getMessage());
+            LOGGER.info(pve.getMessage());
           }
         }
 

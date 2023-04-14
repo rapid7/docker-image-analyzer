@@ -55,7 +55,7 @@ public class DotNetParser implements PackageParser<File> {
           try {
             packages.add(new Package(source, PackageType.DOTNET, operatingSystem, name, version, description, null, null, null, null));
           } catch (PackageValidationException pve) {
-            LOGGER.warn(pve.getMessage());
+            LOGGER.info(pve.getMessage());
           }
         }
       }
