@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.owasp.dependencycheck.analyzer.AbstractAnalyzer;
 import org.owasp.dependencycheck.analyzer.ArchiveAnalyzer;
 import org.owasp.dependencycheck.analyzer.AssemblyAnalyzer;
@@ -40,16 +41,20 @@ import static java.util.Arrays.asList;
 public class OwaspDependencyParserSettingsBuilder {
 
   public static OwaspDependencyParserSettingsBuilder ALL = OwaspDependencyParserSettingsBuilder.builder()
-      .enableAnalyzers(Analyzer.values())
+      .enableAnalyzers(Arrays.stream(Analyzer.values())
+        .filter(analyzer -> analyzer != Analyzer.ASSEMBLY)
+        .toArray(Analyzer[]::new))
       .allowExperimentalAnalyzers()
       .allowRetiredAnalyzers();
   public static OwaspDependencyParserSettingsBuilder EXPERIMENTAL = OwaspDependencyParserSettingsBuilder.builder()
       .enableAnalyzers(Arrays.stream(Analyzer.values())
+          .filter(analyzer -> analyzer != Analyzer.ASSEMBLY)
           .filter(analyzer -> !analyzer.isRetired())
           .toArray(Analyzer[]::new))
       .allowExperimentalAnalyzers();
   public static OwaspDependencyParserSettingsBuilder DEFAULT = OwaspDependencyParserSettingsBuilder.builder()
       .enableAnalyzers(Arrays.stream(Analyzer.values())
+          .filter(analyzer -> analyzer != Analyzer.ASSEMBLY)
           .filter(analyzer -> !analyzer.isRetired())
           .filter(analyzer -> !analyzer.isExperimental())
           .toArray(Analyzer[]::new));
