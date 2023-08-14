@@ -30,8 +30,12 @@ public class OwaspDependencyParserSettingsBuilderTest {
         .map(OwaspDependencyParserSettingsBuilder.Analyzer::getToggleKey)
         .collect(toList());
     for (String analyzerToggleKey : analyzerToggleKeys) {
-      assertTrue(settings.getBoolean(analyzerToggleKey),
+      if (analyzerToggleKey.equals("analyzer.assembly.enabled")) {
+        assertFalse(settings.getBoolean(analyzerToggleKey), "Expected setting " + analyzerToggleKey + " to be false");
+      } else {
+        assertTrue(settings.getBoolean(analyzerToggleKey),
           "Expected setting " + analyzerToggleKey + " to be true");
+      }
     }
   }
 
