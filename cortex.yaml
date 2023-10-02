@@ -1,0 +1,16 @@
+---
+info:
+  title: Docker Image Analyzer
+  description: docker image analyzer
+  x-cortex-git:
+    github:
+      alias: r7org
+      repository: rapid7/docker-image-analyzer
+  x-cortex-tag: docker-image-analyzer
+  x-cortex-type: service
+  x-cortex-groups: []
+  x-cortex-domain-parents:
+  - tag: vm-container-assessment
+openapi: 3.0.1
+servers:
+- url: "/"
