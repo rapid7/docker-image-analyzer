@@ -8,7 +8,9 @@ info:
       repository: rapid7/docker-image-analyzer
   x-cortex-tag: docker-image-analyzer
   x-cortex-type: service
-  x-cortex-groups: []
+  x-cortex-groups:
+  - target:library
+  - exposure:opensource
   x-cortex-domain-parents:
   - tag: vm-container-assessment
 openapi: 3.0.1
