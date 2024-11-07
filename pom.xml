@@ -11,8 +11,8 @@
   <description>Extracts, parses, and analyzes Docker images into Java objects with JSON mappings.</description>
 
   <scm>
-    <connection>scm:git:git@github.com:rapid7/docker-image-analyzer.git</connection>
-    <developerConnection>scm:git:git@github.com:rapid7/docker-image-analyzer.git</developerConnection>
+    <connection>scm:git:https://github.com/rapid7/docker-image-analyzer.git</connection>
+    <developerConnection>scm:git:https://github.com/rapid7/docker-image-analyzer.git</developerConnection>
     <url>https://github.com/rapid7/docker-image-analyzer</url>
     <tag>0.2.7</tag>
   </scm>
@@ -335,7 +335,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.5</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -345,6 +345,13 @@
                 </goals>
               </execution>
             </executions>
+            <configuration>
+              <!-- Prevent gpg from using pinentry programs -->
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
+            </configuration>
           </plugin>
 
           <plugin>
