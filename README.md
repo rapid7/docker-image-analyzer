@@ -1,3 +1,6 @@
+# DEPRECATED
+Rapid7 has stopped supporting containers in EA. As such, this project will not receive new changes from Rapid7, though pull requests may still be accepted and new releases published on request.
+
 ## Docker Image Analyzer
 
 
